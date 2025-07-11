@@ -164,6 +164,36 @@ class QuestService {
     
     return false;
   }
+  
+  async getCompletedQuests(userId = null) {
+    await fs.ensureDir(QUESTS_DIR);
+    
+    const files = await fs.readdir(QUESTS_DIR);
+    const mdFiles = files.filter(file => file.endsWith('.md'));
+    
+    const completedQuests = [];
+    
+    for (const file of mdFiles) {
+      const filePath = path.join(QUESTS_DIR, file);
+      const quest = await parseMarkdown(filePath);
+      
+      if (quest && quest.status === 'completed') {
+        if (!userId || quest.acceptedBy === userId) {
+          quest.mdFilePath = `/data/quests/${file}`;
+          completedQuests.push(quest);
+        }
+      }
+    }
+    
+    // Sort by completedAt descending
+    completedQuests.sort((a, b) => {
+      const dateA = new Date(a.completedAt || a.updated_at).getTime();
+      const dateB = new Date(b.completedAt || b.updated_at).getTime();
+      return dateB - dateA;
+    });
+    
+    return completedQuests;
+  }
 }
 
 module.exports = new QuestService();

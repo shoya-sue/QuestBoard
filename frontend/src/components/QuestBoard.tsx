@@ -5,8 +5,11 @@ import GoogleLogin from './GoogleLogin';
 import AdminPanel from './AdminPanel';
 import QuestFilter, { FilterOptions } from './QuestFilter';
 import Pagination from './Pagination';
+import Notification from './Notification';
+import QuestHistory from './QuestHistory';
 import { getQuests, acceptQuest, completeQuest, Pagination as PaginationType } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import socketService from '../services/socket';
 import './QuestBoard.css';
 
 interface Quest {
@@ -28,8 +31,13 @@ const QuestBoard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationType | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: 'info' | 'success' | 'warning' | 'error';
+  } | null>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     difficulty: '',
     status: '',
@@ -55,6 +63,60 @@ const QuestBoard: React.FC = () => {
 
   useEffect(() => {
     fetchQuests(currentPage);
+    
+    // WebSocket接続
+    socketService.connect();
+    
+    // WebSocketイベントリスナー
+    socketService.onQuestUpdate((data) => {
+      console.log('Quest update received:', data);
+      
+      // 現在のページを再読み込み
+      if (data.type === 'created' || data.type === 'deleted') {
+        fetchQuests(currentPage);
+        
+        // 通知表示
+        if (data.type === 'created') {
+          setNotification({
+            message: `新しいクエスト「${data.quest.title}」が追加されました`,
+            type: 'info'
+          });
+        } else {
+          setNotification({
+            message: 'クエストが削除されました',
+            type: 'info'
+          });
+        }
+      } else if (data.type === 'updated' || data.type === 'accepted' || data.type === 'completed') {
+        // 特定のクエストのみ更新
+        setQuests(prevQuests => 
+          prevQuests.map(q => q.id === data.quest.id ? data.quest : q)
+        );
+        
+        // 選択中のクエストも更新
+        if (selectedQuest?.id === data.quest.id) {
+          setSelectedQuest(data.quest);
+        }
+        
+        // 通知表示
+        if (data.type === 'accepted' && data.quest.acceptedBy !== user?.id) {
+          setNotification({
+            message: `クエスト「${data.quest.title}」が他のユーザーに受注されました`,
+            type: 'warning'
+          });
+        } else if (data.type === 'completed') {
+          setNotification({
+            message: `クエスト「${data.quest.title}」が完了しました`,
+            type: 'success'
+          });
+        }
+      }
+    });
+    
+    return () => {
+      socketService.offQuestUpdate();
+      socketService.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -141,12 +203,25 @@ const QuestBoard: React.FC = () => {
 
   return (
     <div className="quest-board">
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
       <div className="quest-board-header">
         <h1>クエストボード</h1>
         <div className="user-info">
           {user ? (
             <>
               <span>ようこそ、{user.username}さん</span>
+              <button 
+                onClick={() => setShowHistory(!showHistory)} 
+                className="history-button"
+              >
+                {showHistory ? 'クエスト一覧' : '完了履歴'}
+              </button>
               {user.role === 'admin' && (
                 <button 
                   onClick={() => setShowAdminPanel(!showAdminPanel)} 
@@ -166,6 +241,8 @@ const QuestBoard: React.FC = () => {
       </div>
       {showAdminPanel && user?.role === 'admin' ? (
         <AdminPanel />
+      ) : showHistory && user ? (
+        <QuestHistory userId={user.id} />
       ) : (
         <div className="quest-board-content">
           <div className="quest-list">

@@ -27,7 +27,8 @@
 
 .logout-button,
 .login-button,
-.admin-button {
+.admin-button,
+.history-button {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
@@ -53,6 +54,15 @@
 
 .login-button:hover {
   background-color: #1976d2;
+}
+
+.history-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.history-button:hover {
+  background-color: #388e3c;
 }
 
 .admin-button {

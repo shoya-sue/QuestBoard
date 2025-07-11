@@ -67,4 +67,10 @@ export const deleteQuest = async (id: string): Promise<void> => {
   await api.delete(`/quests/${id}`);
 };
 
+export const getCompletedQuests = async (userId?: string): Promise<Quest[]> => {
+  const params = userId ? { userId } : {};
+  const response = await api.get<Quest[]>('/quests/completed', { params });
+  return response.data;
+};
+
 export default api;

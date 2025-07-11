@@ -1,0 +1,106 @@
+.quest-history {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 24px;
+}
+
+.quest-history h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.quest-history-loading,
+.quest-history-error {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.quest-history-error {
+  color: #f44336;
+}
+
+.no-history {
+  text-align: center;
+  color: #999;
+  padding: 40px 0;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.history-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.history-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.history-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.history-item h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.difficulty {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.difficulty-easy {
+  background-color: #4caf50;
+  color: white;
+}
+
+.difficulty-medium {
+  background-color: #ff9800;
+  color: white;
+}
+
+.difficulty-hard {
+  background-color: #f44336;
+  color: white;
+}
+
+.history-item-description {
+  color: #666;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.history-item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.reward {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+.completed-date {
+  color: #999;
+}

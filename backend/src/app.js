@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const questRoutes = require('./routes/quests');
 const authRoutes = require('./routes/auth');
+const socketEvents = require('./utils/socketEvents');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,6 +22,28 @@ app.use((err, req, res, next) => {
   res.status(500).send({ error: 'Something went wrong!' });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Quest Board backend server running on port ${PORT}`);
 });
+
+// WebSocket setup
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('New client connected');
+  
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
+
+// Initialize socket events
+socketEvents.setIO(io);
+
+// Export io for use in other modules
+module.exports = { app, io };
