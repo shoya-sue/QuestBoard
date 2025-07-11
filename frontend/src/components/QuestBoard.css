@@ -1,0 +1,65 @@
+.quest-board {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.quest-board h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.quest-board-content {
+  display: flex;
+  gap: 30px;
+}
+
+.quest-list {
+  flex: 1;
+}
+
+.quest-list h2 {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.no-quests {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.quest-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.quest-detail-container {
+  flex: 1;
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+}
+
+.quest-board-loading,
+.quest-board-error {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
+}
+
+.quest-board-error {
+  color: #d32f2f;
+}
+
+@media (max-width: 768px) {
+  .quest-board-content {
+    flex-direction: column;
+  }
+  
+  .quest-detail-container {
+    position: static;
+  }
+}
