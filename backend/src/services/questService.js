@@ -43,7 +43,7 @@ class QuestService {
     return null;
   }
   
-  async updateQuestStatus(id, newStatus) {
+  async updateQuestStatus(id, newStatus, userId = null) {
     const files = await fs.readdir(QUESTS_DIR);
     const mdFiles = files.filter(file => file.endsWith('.md'));
     
@@ -54,6 +54,12 @@ class QuestService {
       if (quest && quest.id === id) {
         quest.status = newStatus;
         quest.updated_at = new Date().toISOString();
+        
+        if (newStatus === 'in_progress' && userId) {
+          quest.acceptedBy = userId;
+        } else if (newStatus === 'completed') {
+          quest.completedAt = new Date().toISOString();
+        }
         
         await saveMarkdown(filePath, quest);
         quest.mdFilePath = `/data/quests/${file}`;

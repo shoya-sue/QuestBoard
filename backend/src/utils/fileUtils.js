@@ -49,6 +49,8 @@ function parseMarkdown(filePath) {
         difficulty: frontMatter.difficulty,
         created_at: frontMatter.created_at,
         updated_at: frontMatter.updated_at,
+        acceptedBy: frontMatter.acceptedBy,
+        completedAt: frontMatter.completedAt,
         description: description,
         content: body
       });
@@ -61,7 +63,7 @@ function parseMarkdown(filePath) {
 function saveMarkdown(filePath, quest) {
   return new Promise(async (resolve, reject) => {
     try {
-      const frontMatter = [
+      const frontMatterLines = [
         '---',
         `id: ${quest.id}`,
         `title: ${quest.title}`,
@@ -69,9 +71,18 @@ function saveMarkdown(filePath, quest) {
         `reward: ${quest.reward}`,
         `difficulty: ${quest.difficulty}`,
         `created_at: ${quest.created_at}`,
-        `updated_at: ${quest.updated_at}`,
-        '---'
-      ].join('\n');
+        `updated_at: ${quest.updated_at}`
+      ];
+      
+      if (quest.acceptedBy) {
+        frontMatterLines.push(`acceptedBy: ${quest.acceptedBy}`);
+      }
+      if (quest.completedAt) {
+        frontMatterLines.push(`completedAt: ${quest.completedAt}`);
+      }
+      
+      frontMatterLines.push('---');
+      const frontMatter = frontMatterLines.join('\n');
       
       const content = `${frontMatter}\n\n${quest.content}`;
       
