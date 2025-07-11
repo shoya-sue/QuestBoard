@@ -38,6 +38,62 @@ router.post('/:id/accept', authenticate, async (req, res) => {
   }
 });
 
+router.post('/', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { title, description, reward, difficulty } = req.body;
+    
+    if (!title || !description || !reward || !difficulty) {
+      return res.status(400).json({ error: '必須項目が不足しています' });
+    }
+    
+    const quest = await questService.createQuest({
+      title,
+      description,
+      reward,
+      difficulty,
+      createdBy: req.user.id
+    });
+    
+    res.status(201).json(quest);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/:id', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { title, description, reward, difficulty } = req.body;
+    const quest = await questService.updateQuest(req.params.id, {
+      title,
+      description,
+      reward,
+      difficulty
+    });
+    
+    if (!quest) {
+      return res.status(404).json({ error: 'Quest not found' });
+    }
+    
+    res.json(quest);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/:id', authenticate, isAdmin, async (req, res) => {
+  try {
+    const success = await questService.deleteQuest(req.params.id);
+    
+    if (!success) {
+      return res.status(404).json({ error: 'Quest not found' });
+    }
+    
+    res.json({ message: 'クエストを削除しました' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post('/:id/complete', authenticate, async (req, res) => {
   try {
     const quest = await questService.getQuestById(req.params.id);

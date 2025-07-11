@@ -1,0 +1,89 @@
+.quest-form {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.quest-form .form-group {
+  margin-bottom: 20px;
+}
+
+.quest-form label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: 600;
+}
+
+.quest-form input,
+.quest-form textarea,
+.quest-form select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  font-family: inherit;
+  transition: border-color 0.3s;
+}
+
+.quest-form input:focus,
+.quest-form textarea:focus,
+.quest-form select:focus {
+  outline: none;
+  border-color: #2196f3;
+}
+
+.quest-form input:disabled,
+.quest-form textarea:disabled,
+.quest-form select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.quest-form textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.form-actions button[type="submit"] {
+  background-color: #4caf50;
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.form-actions button[type="button"] {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.form-actions button[type="button"]:hover:not(:disabled) {
+  background-color: #e0e0e0;
+}
+
+.form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

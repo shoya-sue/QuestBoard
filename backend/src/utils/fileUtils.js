@@ -51,6 +51,7 @@ function parseMarkdown(filePath) {
         updated_at: frontMatter.updated_at,
         acceptedBy: frontMatter.acceptedBy,
         completedAt: frontMatter.completedAt,
+        createdBy: frontMatter.createdBy,
         description: description,
         content: body
       });
@@ -79,6 +80,9 @@ function saveMarkdown(filePath, quest) {
       }
       if (quest.completedAt) {
         frontMatterLines.push(`completedAt: ${quest.completedAt}`);
+      }
+      if (quest.createdBy) {
+        frontMatterLines.push(`createdBy: ${quest.createdBy}`);
       }
       
       frontMatterLines.push('---');

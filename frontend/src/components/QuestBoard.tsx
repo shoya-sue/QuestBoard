@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import QuestCard from './QuestCard';
 import QuestDetail from './QuestDetail';
 import AuthForm from './AuthForm';
+import AdminPanel from './AdminPanel';
 import { getQuests, acceptQuest, completeQuest } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import './QuestBoard.css';
@@ -23,6 +24,7 @@ const QuestBoard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAuthForm, setShowAuthForm] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const { user, logout } = useAuth();
 
   const fetchQuests = async () => {
@@ -108,6 +110,14 @@ const QuestBoard: React.FC = () => {
           {user ? (
             <>
               <span>ようこそ、{user.username}さん</span>
+              {user.role === 'admin' && (
+                <button 
+                  onClick={() => setShowAdminPanel(!showAdminPanel)} 
+                  className="admin-button"
+                >
+                  {showAdminPanel ? 'クエスト一覧' : '管理画面'}
+                </button>
+              )}
               <button onClick={logout} className="logout-button">ログアウト</button>
             </>
           ) : (
@@ -117,35 +127,39 @@ const QuestBoard: React.FC = () => {
           )}
         </div>
       </div>
-      <div className="quest-board-content">
-        <div className="quest-list">
-          <h2>クエスト一覧</h2>
-          {quests.length === 0 ? (
-            <p className="no-quests">現在利用可能なクエストはありません</p>
-          ) : (
-            <div className="quest-cards">
-              {quests.map(quest => (
-                <QuestCard
-                  key={quest.id}
-                  quest={quest}
-                  onClick={() => setSelectedQuest(quest)}
-                  selected={selectedQuest?.id === quest.id}
-                />
-              ))}
+      {showAdminPanel && user?.role === 'admin' ? (
+        <AdminPanel />
+      ) : (
+        <div className="quest-board-content">
+          <div className="quest-list">
+            <h2>クエスト一覧</h2>
+            {quests.length === 0 ? (
+              <p className="no-quests">現在利用可能なクエストはありません</p>
+            ) : (
+              <div className="quest-cards">
+                {quests.map(quest => (
+                  <QuestCard
+                    key={quest.id}
+                    quest={quest}
+                    onClick={() => setSelectedQuest(quest)}
+                    selected={selectedQuest?.id === quest.id}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+          {selectedQuest && (
+            <div className="quest-detail-container">
+              <QuestDetail
+                quest={selectedQuest}
+                onAccept={handleAcceptQuest}
+                onComplete={handleCompleteQuest}
+                onClose={() => setSelectedQuest(null)}
+              />
             </div>
           )}
         </div>
-        {selectedQuest && (
-          <div className="quest-detail-container">
-            <QuestDetail
-              quest={selectedQuest}
-              onAccept={handleAcceptQuest}
-              onComplete={handleCompleteQuest}
-              onClose={() => setSelectedQuest(null)}
-            />
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };

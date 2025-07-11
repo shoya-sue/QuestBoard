@@ -1,0 +1,140 @@
+.admin-panel {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.admin-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.create-button {
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.create-button:hover {
+  background-color: #45a049;
+}
+
+.quest-table {
+  overflow-x: auto;
+}
+
+.quest-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.quest-table th,
+.quest-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.quest-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #555;
+}
+
+.quest-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.difficulty-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.difficulty-E { background-color: #4caf50; }
+.difficulty-D { background-color: #8bc34a; }
+.difficulty-C { background-color: #ffeb3b; color: #333; }
+.difficulty-B { background-color: #ff9800; }
+.difficulty-A { background-color: #ff5722; }
+.difficulty-S { background-color: #f44336; }
+.difficulty-SS { background-color: #9c27b0; }
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-available {
+  background-color: #e8f5e9;
+  color: #4caf50;
+}
+
+.status-in_progress {
+  background-color: #e3f2fd;
+  color: #2196f3;
+}
+
+.status-completed {
+  background-color: #f5f5f5;
+  color: #757575;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-button,
+.delete-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.edit-button {
+  background-color: #2196f3;
+  color: white;
+}
+
+.edit-button:hover {
+  background-color: #1976d2;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #d32f2f;
+}
+
+.admin-panel-loading {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
+  color: #666;
+}

@@ -43,4 +43,18 @@ export const completeQuest = async (id: string): Promise<Quest> => {
   return response.data;
 };
 
+export const createQuest = async (data: Partial<Quest>): Promise<Quest> => {
+  const response = await api.post<Quest>('/quests', data);
+  return response.data;
+};
+
+export const updateQuest = async (id: string, data: Partial<Quest>): Promise<Quest> => {
+  const response = await api.put<Quest>(`/quests/${id}`, data);
+  return response.data;
+};
+
+export const deleteQuest = async (id: string): Promise<void> => {
+  await api.delete(`/quests/${id}`);
+};
+
 export default api;
