@@ -6,7 +6,8 @@
     "test:watch": "jest --watch",
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "reindex": "node src/scripts/reindex.js"
+    "reindex": "node src/scripts/reindex.js",
+    "migrate": "node src/migrations/migrate.js"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^9.0.3",
