@@ -6,13 +6,13 @@ const { parseMarkdown, saveMarkdown } = require('../utils/fileUtils');
 const QUESTS_DIR = path.join(__dirname, '../../data/quests');
 
 class QuestService {
-  async getActiveQuests() {
+  async getActiveQuests(page = 1, limit = 10) {
     await fs.ensureDir(QUESTS_DIR);
     
     const files = await fs.readdir(QUESTS_DIR);
     const mdFiles = files.filter(file => file.endsWith('.md'));
     
-    const quests = [];
+    const allQuests = [];
     
     for (const file of mdFiles) {
       const filePath = path.join(QUESTS_DIR, file);
@@ -20,11 +20,27 @@ class QuestService {
       
       if (quest && (quest.status === 'available' || quest.status === 'in_progress')) {
         quest.mdFilePath = `/data/quests/${file}`;
-        quests.push(quest);
+        allQuests.push(quest);
       }
     }
     
-    return quests;
+    // Sort by updated_at descending
+    allQuests.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+    
+    // Pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const quests = allQuests.slice(startIndex, endIndex);
+    
+    return {
+      quests,
+      pagination: {
+        total: allQuests.length,
+        page,
+        limit,
+        totalPages: Math.ceil(allQuests.length / limit)
+      }
+    };
   }
   
   async getQuestById(id) {

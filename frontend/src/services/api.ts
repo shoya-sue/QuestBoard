@@ -19,12 +19,22 @@ export interface Quest {
   mdFilePath: string;
 }
 
-export interface QuestsResponse {
-  quests: Quest[];
+export interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
-export const getQuests = async (): Promise<QuestsResponse> => {
-  const response = await api.get<QuestsResponse>('/quests');
+export interface QuestsResponse {
+  quests: Quest[];
+  pagination: Pagination;
+}
+
+export const getQuests = async (page = 1, limit = 10): Promise<QuestsResponse> => {
+  const response = await api.get<QuestsResponse>('/quests', {
+    params: { page, limit }
+  });
   return response.data;
 };
 

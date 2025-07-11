@@ -6,8 +6,10 @@ const { authenticate, isAdmin } = require('../middleware/auth');
 
 router.get('/', async (req, res) => {
   try {
-    const quests = await questService.getActiveQuests();
-    res.json({ quests });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const result = await questService.getActiveQuests(page, limit);
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

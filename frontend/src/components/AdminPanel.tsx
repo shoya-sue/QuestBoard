@@ -12,7 +12,7 @@ const AdminPanel: React.FC = () => {
   const fetchAllQuests = async () => {
     try {
       setLoading(true);
-      const data = await getQuests();
+      const data = await getQuests(1, 100); // 管理画面では全件表示
       setQuests(data.quests);
     } catch (error) {
       console.error('Failed to fetch quests:', error);

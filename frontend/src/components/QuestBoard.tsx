@@ -4,7 +4,8 @@ import QuestDetail from './QuestDetail';
 import GoogleLogin from './GoogleLogin';
 import AdminPanel from './AdminPanel';
 import QuestFilter, { FilterOptions } from './QuestFilter';
-import { getQuests, acceptQuest, completeQuest } from '../services/api';
+import Pagination from './Pagination';
+import { getQuests, acceptQuest, completeQuest, Pagination as PaginationType } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import './QuestBoard.css';
 
@@ -27,6 +28,8 @@ const QuestBoard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationType | null>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     difficulty: '',
     status: '',
@@ -34,11 +37,13 @@ const QuestBoard: React.FC = () => {
   });
   const { user, logout } = useAuth();
 
-  const fetchQuests = async () => {
+  const fetchQuests = async (page = 1) => {
     try {
       setLoading(true);
-      const data = await getQuests();
+      const data = await getQuests(page);
       setQuests(data.quests);
+      setPagination(data.pagination);
+      setCurrentPage(page);
       setError(null);
     } catch (err) {
       setError('クエストの取得に失敗しました');
@@ -49,7 +54,7 @@ const QuestBoard: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchQuests();
+    fetchQuests(currentPage);
   }, []);
 
   useEffect(() => {
@@ -71,6 +76,11 @@ const QuestBoard: React.FC = () => {
 
     setFilteredQuests(filtered);
   }, [quests, filters]);
+
+  const handlePageChange = (page: number) => {
+    fetchQuests(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleAcceptQuest = async (questId: string) => {
     if (!user) {
@@ -178,6 +188,13 @@ const QuestBoard: React.FC = () => {
                   />
                 ))}
               </div>
+            )}
+            {pagination && pagination.totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
+              />
             )}
           </div>
           {selectedQuest && (
