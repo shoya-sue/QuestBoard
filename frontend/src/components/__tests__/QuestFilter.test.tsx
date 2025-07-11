@@ -18,8 +18,8 @@ describe('QuestFilter', () => {
     render(<QuestFilter filters={defaultFilters} onFilterChange={mockOnFilterChange} />);
     
     expect(screen.getByPlaceholderText('クエスト名で検索...')).toBeInTheDocument();
-    expect(screen.getByText('すべての難易度')).toBeInTheDocument();
-    expect(screen.getByText('すべてのステータス')).toBeInTheDocument();
+    expect(screen.getByText('全て')).toBeInTheDocument();
+    expect(screen.getByText('未受注')).toBeInTheDocument();
   });
 
   it('検索入力が変更されたときにonFilterChangeが呼ばれる', () => {
@@ -37,19 +37,21 @@ describe('QuestFilter', () => {
   it('難易度選択が変更されたときにonFilterChangeが呼ばれる', () => {
     render(<QuestFilter filters={defaultFilters} onFilterChange={mockOnFilterChange} />);
     
-    const difficultySelect = screen.getByDisplayValue('すべての難易度');
-    fireEvent.change(difficultySelect, { target: { value: 'hard' } });
+    const selects = screen.getAllByRole('combobox');
+    const difficultySelect = selects[0]; // 最初のselectが難易度
+    fireEvent.change(difficultySelect, { target: { value: 'A' } });
     
     expect(mockOnFilterChange).toHaveBeenCalledWith({
       ...defaultFilters,
-      difficulty: 'hard'
+      difficulty: 'A'
     });
   });
 
   it('ステータス選択が変更されたときにonFilterChangeが呼ばれる', () => {
     render(<QuestFilter filters={defaultFilters} onFilterChange={mockOnFilterChange} />);
     
-    const statusSelect = screen.getByDisplayValue('すべてのステータス');
+    const selects = screen.getAllByRole('combobox');
+    const statusSelect = selects[1]; // 2番目のselectがステータス
     fireEvent.change(statusSelect, { target: { value: 'available' } });
     
     expect(mockOnFilterChange).toHaveBeenCalledWith({

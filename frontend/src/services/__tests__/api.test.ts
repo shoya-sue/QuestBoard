@@ -1,8 +1,25 @@
+import { getQuests, getQuestById, acceptQuest, completeQuest } from '../api';
 import axios from 'axios';
-import api, { getQuests, getQuestById, acceptQuest, completeQuest } from '../api';
 
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+// Mock axios
+jest.mock('axios', () => ({
+  create: jest.fn(() => ({
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+    interceptors: {
+      request: {
+        use: jest.fn()
+      },
+      response: {
+        use: jest.fn()
+      }
+    }
+  }))
+}));
+
+const mockAxios = axios.create() as any;
 
 describe('API Service', () => {
   beforeEach(() => {
@@ -26,11 +43,11 @@ describe('API Service', () => {
         }
       };
 
-      mockedAxios.get.mockResolvedValue(mockResponse);
+      mockAxios.get.mockResolvedValue(mockResponse);
 
       const result = await getQuests(1, 10);
 
-      expect(mockedAxios.get).toHaveBeenCalledWith('/quests', {
+      expect(mockAxios.get).toHaveBeenCalledWith('/quests', {
         params: { page: 1, limit: 10 }
       });
       expect(result).toEqual(mockResponse.data);
@@ -49,11 +66,11 @@ describe('API Service', () => {
         }
       };
 
-      mockedAxios.get.mockResolvedValue(mockResponse);
+      mockAxios.get.mockResolvedValue(mockResponse);
 
       await getQuests();
 
-      expect(mockedAxios.get).toHaveBeenCalledWith('/quests', {
+      expect(mockAxios.get).toHaveBeenCalledWith('/quests', {
         params: { page: 1, limit: 10 }
       });
     });
@@ -68,11 +85,11 @@ describe('API Service', () => {
         status: 'available'
       };
 
-      mockedAxios.get.mockResolvedValue({ data: mockQuest });
+      mockAxios.get.mockResolvedValue({ data: mockQuest });
 
       const result = await getQuestById('quest-1');
 
-      expect(mockedAxios.get).toHaveBeenCalledWith('/quests/quest-1');
+      expect(mockAxios.get).toHaveBeenCalledWith('/quests/quest-1');
       expect(result).toEqual(mockQuest);
     });
   });
@@ -85,11 +102,11 @@ describe('API Service', () => {
         status: 'in_progress'
       };
 
-      mockedAxios.post.mockResolvedValue({ data: mockQuest });
+      mockAxios.post.mockResolvedValue({ data: mockQuest });
 
       const result = await acceptQuest('quest-1');
 
-      expect(mockedAxios.post).toHaveBeenCalledWith('/quests/quest-1/accept');
+      expect(mockAxios.post).toHaveBeenCalledWith('/quests/quest-1/accept');
       expect(result).toEqual(mockQuest);
     });
   });
@@ -102,11 +119,11 @@ describe('API Service', () => {
         status: 'completed'
       };
 
-      mockedAxios.post.mockResolvedValue({ data: mockQuest });
+      mockAxios.post.mockResolvedValue({ data: mockQuest });
 
       const result = await completeQuest('quest-1');
 
-      expect(mockedAxios.post).toHaveBeenCalledWith('/quests/quest-1/complete');
+      expect(mockAxios.post).toHaveBeenCalledWith('/quests/quest-1/complete');
       expect(result).toEqual(mockQuest);
     });
   });
@@ -114,7 +131,7 @@ describe('API Service', () => {
   describe('Error Handling', () => {
     it('ネットワークエラーを適切に処理する', async () => {
       const networkError = new Error('Network Error');
-      mockedAxios.get.mockRejectedValue(networkError);
+      mockAxios.get.mockRejectedValue(networkError);
 
       await expect(getQuests()).rejects.toThrow('Network Error');
     });
@@ -125,7 +142,7 @@ describe('API Service', () => {
       };
       
       const removeItemSpy = jest.spyOn(Storage.prototype, 'removeItem');
-      mockedAxios.get.mockRejectedValue(authError);
+      mockAxios.get.mockRejectedValue(authError);
 
       try {
         await getQuests();

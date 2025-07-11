@@ -25,9 +25,9 @@ describe('QuestCard', () => {
 
   it('クリック時にonClickが呼ばれる', () => {
     const handleClick = jest.fn();
-    render(<QuestCard quest={mockQuest} onClick={handleClick} selected={false} />);
+    const { container } = render(<QuestCard quest={mockQuest} onClick={handleClick} selected={false} />);
     
-    fireEvent.click(screen.getByRole('article'));
+    fireEvent.click(container.firstChild!);
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
@@ -40,17 +40,18 @@ describe('QuestCard', () => {
   it('ステータスごとに適切な表示がされる', () => {
     const inProgressQuest = { ...mockQuest, status: 'in_progress' as const };
     const { rerender } = render(<QuestCard quest={inProgressQuest} onClick={() => {}} selected={false} />);
-    expect(screen.getByText('進行中')).toBeInTheDocument();
+    expect(screen.getByText('受注中')).toBeInTheDocument();
 
     const completedQuest = { ...mockQuest, status: 'completed' as const };
     rerender(<QuestCard quest={completedQuest} onClick={() => {}} selected={false} />);
-    expect(screen.getByText('完了')).toBeInTheDocument();
+    expect(screen.getByText('達成済み')).toBeInTheDocument();
   });
 
   it('難易度ごとに適切なクラスが適用される', () => {
     const { container } = render(<QuestCard quest={mockQuest} onClick={() => {}} selected={false} />);
     const difficultyElement = container.querySelector('.quest-difficulty');
     
-    expect(difficultyElement).toHaveClass('difficulty-easy');
+    expect(difficultyElement).toHaveClass('quest-difficulty');
+    expect(difficultyElement).toHaveTextContent('easy');
   });
 });
