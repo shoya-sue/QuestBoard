@@ -68,3 +68,36 @@
   font-size: 14px;
   font-weight: 600;
 }
+
+@media (max-width: 768px) {
+  .quest-card {
+    padding: 16px;
+  }
+
+  .quest-card-header h3 {
+    font-size: 16px;
+    flex: 1;
+    margin-right: 8px;
+  }
+
+  .quest-difficulty {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  .quest-description {
+    font-size: 13px;
+    margin: 8px 0;
+  }
+
+  .quest-card-footer {
+    margin-top: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .quest-reward,
+  .quest-status {
+    font-size: 13px;
+  }
+}

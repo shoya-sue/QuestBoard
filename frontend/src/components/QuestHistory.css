@@ -104,3 +104,51 @@
 .completed-date {
   color: #999;
 }
+
+@media (max-width: 768px) {
+  .quest-history {
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  .quest-history h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .history-list {
+    gap: 12px;
+  }
+
+  .history-item {
+    padding: 12px;
+  }
+
+  .history-item h3 {
+    font-size: 16px;
+    flex: 1;
+    margin-right: 8px;
+  }
+
+  .difficulty {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .history-item-description {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .history-item-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .reward,
+  .completed-date {
+    font-size: 13px;
+  }
+}
