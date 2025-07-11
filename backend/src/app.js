@@ -6,9 +6,13 @@ const questRoutes = require('./routes/quests');
 const authRoutes = require('./routes/auth');
 const socketEvents = require('./utils/socketEvents');
 const errorHandler = require('./middleware/errorHandler');
+const { initSentry, Sentry } = require('./config/sentry');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialize Sentry
+initSentry(app);
 
 app.use(cors());
 app.use(express.json());
@@ -20,6 +24,11 @@ app.use('/data/quests', express.static(path.join(__dirname, '../data/quests')));
 
 // 改善されたエラーハンドリングミドルウェア
 app.use(errorHandler);
+
+// Sentry error handler must be before any other error middleware and after all controllers
+if (Sentry) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 const server = app.listen(PORT, () => {
   console.log(`Quest Board backend server running on port ${PORT}`);

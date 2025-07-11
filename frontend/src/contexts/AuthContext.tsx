@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { User, googleAuth, logout as authLogout, getCurrentUser, initializeAuth } from '../services/auth';
+import { setUser as setSentryUser, clearUser as clearSentryUser } from '../config/sentry';
 
 interface AuthContextType {
   user: User | null;
@@ -32,6 +33,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         initializeAuth();
         const currentUser = await getCurrentUser();
         setUser(currentUser);
+        // Set user in Sentry for error tracking
+        if (currentUser) {
+          setSentryUser({
+            id: currentUser.id,
+            email: currentUser.email,
+            username: currentUser.username
+          });
+        }
       } catch (error) {
         console.error('Failed to load user:', error);
       } finally {
@@ -45,11 +54,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const googleLogin = async (credential: string) => {
     const { user } = await googleAuth(credential);
     setUser(user);
+    // Set user in Sentry for error tracking
+    setSentryUser({
+      id: user.id,
+      email: user.email,
+      username: user.username
+    });
   };
 
   const logout = async () => {
     await authLogout();
     setUser(null);
+    // Clear user from Sentry
+    clearSentryUser();
   };
 
   return (

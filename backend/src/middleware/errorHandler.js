@@ -1,5 +1,16 @@
+const { captureError } = require('../config/sentry');
+
 const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
+  
+  // Capture error with Sentry
+  captureError(err, {
+    user: req.user,
+    url: req.url,
+    method: req.method,
+    ip: req.ip,
+    userAgent: req.get('user-agent')
+  });
 
   // Mongooseバリデーションエラー
   if (err.name === 'ValidationError') {

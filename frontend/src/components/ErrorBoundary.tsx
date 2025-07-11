@@ -1,4 +1,6 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ReactNode } from 'react';
+import { captureError } from '../config/sentry';
+import './ErrorBoundary.css';
 
 interface Props {
   children: ReactNode;
@@ -7,96 +9,62 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
-  errorInfo: ErrorInfo | null;
 }
 
 class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-    errorInfo: null
-  };
-
-  public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error, errorInfo: null };
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false, error: null };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
-    this.setState({
-      error,
-      errorInfo
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+    
+    // Report to Sentry
+    captureError(error, {
+      componentStack: errorInfo.componentStack,
+      errorBoundary: true
     });
   }
 
-  private handleReset = () => {
-    this.setState({
-      hasError: false,
-      error: null,
-      errorInfo: null
-    });
-    window.location.reload();
+  handleReset = () => {
+    this.setState({ hasError: false, error: null });
+    window.location.href = '/';
   };
 
-  public render() {
+  render() {
     if (this.state.hasError) {
       return (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          padding: '20px',
-          backgroundColor: '#f5f5f5'
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '40px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-            maxWidth: '600px',
-            width: '100%',
-            textAlign: 'center'
-          }}>
-            <h1 style={{ color: '#f44336', marginBottom: '20px' }}>
-              エラーが発生しました
-            </h1>
-            <p style={{ color: '#666', marginBottom: '20px' }}>
-              申し訳ございません。予期せぬエラーが発生しました。
+        <div className="error-boundary">
+          <div className="error-boundary__content">
+            <h1 className="error-boundary__title">問題が発生しました</h1>
+            <p className="error-boundary__message">
+              申し訳ございません。予期しないエラーが発生しました。
             </p>
+            <div className="error-boundary__actions">
+              <button 
+                className="error-boundary__button error-boundary__button--primary"
+                onClick={this.handleReset}
+              >
+                ホームに戻る
+              </button>
+              <button 
+                className="error-boundary__button error-boundary__button--secondary"
+                onClick={() => window.location.reload()}
+              >
+                ページを再読み込み
+              </button>
+            </div>
             {process.env.NODE_ENV === 'development' && this.state.error && (
-              <details style={{ marginBottom: '20px', textAlign: 'left' }}>
-                <summary style={{ cursor: 'pointer', color: '#999' }}>
-                  エラー詳細（開発環境のみ）
-                </summary>
-                <pre style={{
-                  backgroundColor: '#f5f5f5',
-                  padding: '10px',
-                  borderRadius: '4px',
-                  overflow: 'auto',
-                  fontSize: '12px',
-                  marginTop: '10px'
-                }}>
-                  {this.state.error.toString()}
-                  {this.state.errorInfo && this.state.errorInfo.componentStack}
-                </pre>
+              <details className="error-boundary__details">
+                <summary>エラーの詳細</summary>
+                <pre>{this.state.error.stack}</pre>
               </details>
             )}
-            <button
-              onClick={this.handleReset}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#2196f3',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '16px',
-                cursor: 'pointer'
-              }}
-            >
-              ページを再読み込み
-            </button>
           </div>
         </div>
       );
