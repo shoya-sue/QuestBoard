@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import QuestCard from './QuestCard';
 import QuestDetail from './QuestDetail';
-import AuthForm from './AuthForm';
+import GoogleLogin from './GoogleLogin';
 import AdminPanel from './AdminPanel';
 import QuestFilter, { FilterOptions } from './QuestFilter';
 import { getQuests, acceptQuest, completeQuest } from '../services/api';
@@ -124,7 +124,7 @@ const QuestBoard: React.FC = () => {
     return (
       <div className="quest-board">
         <h1>クエストボード</h1>
-        <AuthForm onSuccess={() => setShowAuthForm(false)} />
+        <GoogleLogin onSuccess={() => setShowAuthForm(false)} />
       </div>
     );
   }

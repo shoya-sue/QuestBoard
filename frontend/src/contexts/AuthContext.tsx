@@ -1,11 +1,10 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { User, login as authLogin, logout as authLogout, register as authRegister, getCurrentUser, initializeAuth } from '../services/auth';
+import { User, googleAuth, logout as authLogout, getCurrentUser, initializeAuth } from '../services/auth';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  register: (username: string, password: string) => Promise<void>;
+  googleLogin: (credential: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -43,13 +42,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadUser();
   }, []);
 
-  const login = async (username: string, password: string) => {
-    const { user } = await authLogin(username, password);
-    setUser(user);
-  };
-
-  const register = async (username: string, password: string) => {
-    const { user } = await authRegister(username, password);
+  const googleLogin = async (credential: string) => {
+    const { user } = await googleAuth(credential);
     setUser(user);
   };
 
@@ -59,7 +53,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, googleLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );

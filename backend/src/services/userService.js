@@ -29,6 +29,11 @@ class UserService {
     return users.find(user => user.username === username);
   }
 
+  async getUserByEmail(email) {
+    const users = await this.getAllUsers();
+    return users.find(user => user.email === email);
+  }
+
   async getUserById(id) {
     const users = await this.getAllUsers();
     return users.find(user => user.id === id);
@@ -56,6 +61,24 @@ class UserService {
 
     const { password: _, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
+  }
+
+  async createGoogleUser(email, name, role = 'user') {
+    const newUser = {
+      id: uuidv4(),
+      email,
+      username: name,
+      role,
+      authProvider: 'google',
+      createdAt: new Date().toISOString(),
+      acceptedQuests: []
+    };
+
+    const data = await fs.readJson(USERS_FILE);
+    data.users.push(newUser);
+    await fs.writeJson(USERS_FILE, data, { spaces: 2 });
+
+    return newUser;
   }
 
   async validateUser(username, password) {

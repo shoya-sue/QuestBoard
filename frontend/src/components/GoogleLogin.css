@@ -1,0 +1,19 @@
+.google-login-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 40px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.google-login-container h2 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.google-login-container p {
+  color: #666;
+  margin-bottom: 30px;
+}

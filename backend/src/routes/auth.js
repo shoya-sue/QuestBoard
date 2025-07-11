@@ -1,50 +1,43 @@
 const express = require('express');
 const router = express.Router();
+const { OAuth2Client } = require('google-auth-library');
 const userService = require('../services/userService');
 const { authenticate } = require('../middleware/auth');
 
-router.post('/register', async (req, res) => {
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+router.post('/google', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { credential } = req.body;
     
-    if (!username || !password) {
-      return res.status(400).json({ error: 'ユーザー名とパスワードは必須です' });
+    if (!credential) {
+      return res.status(400).json({ error: 'Google認証情報が必要です' });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'パスワードは6文字以上必要です' });
-    }
-
-    const user = await userService.createUser(username, password);
-    const token = userService.generateToken(user);
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
     
-    res.status(201).json({ user, token });
-  } catch (error) {
-    if (error.message === 'ユーザー名は既に使用されています') {
-      res.status(409).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: '登録に失敗しました' });
-    }
-  }
-});
-
-router.post('/login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
+    const payload = ticket.getPayload();
+    const email = payload.email;
+    const name = payload.name || email.split('@')[0];
     
-    if (!username || !password) {
-      return res.status(400).json({ error: 'ユーザー名とパスワードは必須です' });
-    }
-
-    const user = await userService.validateUser(username, password);
+    // Check if user is admin
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
+    const isAdmin = adminEmails.includes(email);
+    
+    // Find or create user
+    let user = await userService.getUserByEmail(email);
     if (!user) {
-      return res.status(401).json({ error: 'ユーザー名またはパスワードが正しくありません' });
+      user = await userService.createGoogleUser(email, name, isAdmin ? 'admin' : 'user');
     }
-
+    
     const token = userService.generateToken(user);
     res.json({ user, token });
   } catch (error) {
-    res.status(500).json({ error: 'ログインに失敗しました' });
+    console.error('Google auth error:', error);
+    res.status(500).json({ error: 'Google認証に失敗しました' });
   }
 });
 

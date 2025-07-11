@@ -3,6 +3,7 @@ import api from './api';
 export interface User {
   id: string;
   username: string;
+  email?: string;
   role: string;
   createdAt: string;
   acceptedQuests: string[];
@@ -13,17 +14,8 @@ export interface AuthResponse {
   token: string;
 }
 
-export const register = async (username: string, password: string): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/register', { username, password });
-  if (response.data.token) {
-    localStorage.setItem('token', response.data.token);
-    api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-  }
-  return response.data;
-};
-
-export const login = async (username: string, password: string): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/login', { username, password });
+export const googleAuth = async (credential: string): Promise<AuthResponse> => {
+  const response = await api.post<AuthResponse>('/auth/google', { credential });
   if (response.data.token) {
     localStorage.setItem('token', response.data.token);
     api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
