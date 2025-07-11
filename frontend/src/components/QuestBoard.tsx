@@ -3,6 +3,7 @@ import QuestCard from './QuestCard';
 import QuestDetail from './QuestDetail';
 import AuthForm from './AuthForm';
 import AdminPanel from './AdminPanel';
+import QuestFilter, { FilterOptions } from './QuestFilter';
 import { getQuests, acceptQuest, completeQuest } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import './QuestBoard.css';
@@ -20,11 +21,17 @@ interface Quest {
 
 const QuestBoard: React.FC = () => {
   const [quests, setQuests] = useState<Quest[]>([]);
+  const [filteredQuests, setFilteredQuests] = useState<Quest[]>([]);
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({
+    difficulty: '',
+    status: '',
+    searchTerm: ''
+  });
   const { user, logout } = useAuth();
 
   const fetchQuests = async () => {
@@ -44,6 +51,26 @@ const QuestBoard: React.FC = () => {
   useEffect(() => {
     fetchQuests();
   }, []);
+
+  useEffect(() => {
+    let filtered = quests;
+
+    if (filters.searchTerm) {
+      filtered = filtered.filter(quest =>
+        quest.title.toLowerCase().includes(filters.searchTerm.toLowerCase())
+      );
+    }
+
+    if (filters.difficulty) {
+      filtered = filtered.filter(quest => quest.difficulty === filters.difficulty);
+    }
+
+    if (filters.status) {
+      filtered = filtered.filter(quest => quest.status === filters.status);
+    }
+
+    setFilteredQuests(filtered);
+  }, [quests, filters]);
 
   const handleAcceptQuest = async (questId: string) => {
     if (!user) {
@@ -133,11 +160,16 @@ const QuestBoard: React.FC = () => {
         <div className="quest-board-content">
           <div className="quest-list">
             <h2>クエスト一覧</h2>
-            {quests.length === 0 ? (
-              <p className="no-quests">現在利用可能なクエストはありません</p>
+            <QuestFilter filters={filters} onFilterChange={setFilters} />
+            {filteredQuests.length === 0 ? (
+              <p className="no-quests">
+                {quests.length === 0 
+                  ? '現在利用可能なクエストはありません' 
+                  : '条件に一致するクエストが見つかりません'}
+              </p>
             ) : (
               <div className="quest-cards">
-                {quests.map(quest => (
+                {filteredQuests.map(quest => (
                   <QuestCard
                     key={quest.id}
                     quest={quest}
