@@ -1,11 +1,11 @@
 ---
 id: quest-002
 title: ゴブリン退治
-status: available
+status: in_progress
 reward: 100G
 difficulty: D
 created_at: 2025-01-02T00:00:00Z
-updated_at: 2025-01-02T00:00:00Z
+updated_at: 2025-07-11T06:10:46.529Z
 ---
 
 # ゴブリン退治

@@ -1,11 +1,11 @@
 ---
 id: quest-003
 title: 薬草採取
-status: in_progress
+status: completed
 reward: 50G
 difficulty: E
 created_at: 2025-01-03T00:00:00Z
-updated_at: 2025-01-03T12:00:00Z
+updated_at: 2025-07-11T06:10:55.052Z
 ---
 
 # 薬草採取
