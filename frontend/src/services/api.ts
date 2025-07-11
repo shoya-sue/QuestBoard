@@ -9,6 +9,61 @@ const api = axios.create({
   },
 });
 
+// リクエストインターセプター
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    console.error('Request error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// レスポンスインターセプター
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      // サーバーからのエラーレスポンス
+      switch (error.response.status) {
+        case 401:
+          // 認証エラー
+          localStorage.removeItem('token');
+          window.location.href = '/';
+          break;
+        case 403:
+          // 権限エラー
+          console.error('権限がありません');
+          break;
+        case 404:
+          // リソースが見つからない
+          console.error('リソースが見つかりません');
+          break;
+        case 500:
+          // サーバーエラー
+          console.error('サーバーエラーが発生しました');
+          break;
+        default:
+          console.error('エラーが発生しました:', error.response.data.error || error.message);
+      }
+    } else if (error.request) {
+      // リクエストは送信されたがレスポンスがない
+      console.error('ネットワークエラー: サーバーに接続できません');
+    } else {
+      // リクエストの設定中にエラーが発生
+      console.error('リクエストエラー:', error.message);
+    }
+    return Promise.reject(error);
+  }
+);
+
 export interface Quest {
   id: string;
   title: string;
