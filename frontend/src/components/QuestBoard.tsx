@@ -8,6 +8,7 @@ import Pagination from './Pagination';
 import Notification from './Notification';
 import QuestHistory from './QuestHistory';
 import SearchBar from './SearchBar';
+import NotificationCenter from './NotificationCenter';
 import { getQuests, acceptQuest, completeQuest, Pagination as PaginationType } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import socketService from '../services/socket';
@@ -264,6 +265,7 @@ const QuestBoard: React.FC = () => {
           {user ? (
             <>
               <span>ようこそ、{user.username}さん</span>
+              <NotificationCenter />
               <button 
                 onClick={() => setShowHistory(!showHistory)} 
                 className="history-button"

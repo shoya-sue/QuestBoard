@@ -53,6 +53,24 @@ module.exports = (sequelize, DataTypes) => {
         language: 'ja',
       },
     },
+    emailNotifications: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      field: 'email_notifications',
+    },
+    notificationTypes: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: ['quest_created', 'quest_accepted', 'quest_completed', 'level_up', 'achievement_unlocked'],
+      field: 'notification_types',
+    },
+    locale: {
+      type: DataTypes.STRING,
+      defaultValue: 'ja',
+    },
+    status: {
+      type: DataTypes.ENUM('active', 'inactive', 'suspended'),
+      defaultValue: 'active',
+    },
     lastLoginAt: {
       type: DataTypes.DATE,
       field: 'last_login_at',
@@ -74,6 +92,10 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.UserAchievement, {
       foreignKey: 'user_id',
       as: 'achievements',
+    });
+    User.hasMany(models.Notification, {
+      foreignKey: 'userId',
+      as: 'notifications',
     });
   };
 

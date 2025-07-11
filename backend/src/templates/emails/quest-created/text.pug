@@ -1,0 +1,15 @@
+| Quest Board
+| 
+| 新しいクエストが追加されました
+| 
+| クエスト名: #{quest.title}
+| 説明: #{quest.description}
+| 難易度: #{quest.difficulty === 'easy' ? '簡単' : quest.difficulty === 'medium' ? '普通' : '難しい'}
+| 報酬: #{quest.reward}ポイント
+| カテゴリ: #{quest.category}
+| 
+| クエストを確認する: #{process.env.FRONTEND_URL || 'http://localhost:3000'}/quest/#{quest.id}
+| 
+| ----------------------------------------
+| このメールは Quest Board から #{user.email} 宛に送信されました。
+| 通知設定を変更: #{process.env.FRONTEND_URL || 'http://localhost:3000'}/settings/notifications

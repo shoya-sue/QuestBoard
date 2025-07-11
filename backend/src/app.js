@@ -5,10 +5,12 @@ const path = require('path');
 const questRoutes = require('./routes/quests');
 const authRoutes = require('./routes/auth');
 const searchRoutes = require('./routes/search');
+const notificationRoutes = require('./routes/notifications');
 const socketEvents = require('./utils/socketEvents');
 const errorHandler = require('./middleware/errorHandler');
 const { initSentry, Sentry } = require('./config/sentry');
 const { initElasticsearch } = require('./config/elasticsearch');
+const { initEmail, verifyConnection } = require('./config/email');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,6 +24,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/quests', questRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.use('/data/quests', express.static(path.join(__dirname, '../data/quests')));
 
@@ -38,6 +41,11 @@ const server = app.listen(PORT, async () => {
   
   // Initialize Elasticsearch
   await initElasticsearch();
+  
+  // Initialize Email service
+  if (initEmail()) {
+    await verifyConnection();
+  }
 });
 
 // WebSocket setup

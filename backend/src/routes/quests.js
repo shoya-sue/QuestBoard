@@ -3,6 +3,7 @@ const router = express.Router();
 const questService = require('../services/questService');
 const userService = require('../services/userService');
 const searchService = require('../services/search');
+const notificationService = require('../services/notification');
 const { authenticate, isAdmin } = require('../middleware/auth');
 const { emitQuestCreated, emitQuestUpdated, emitQuestDeleted, emitQuestAccepted, emitQuestCompleted } = require('../utils/socketEvents');
 
@@ -46,6 +47,10 @@ router.post('/:id/accept', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Quest not found' });
     }
     await userService.updateUserQuests(req.user.id, req.params.id, 'accept');
+    
+    // Send notification
+    await notificationService.notifyQuestAccepted(quest, req.user.id);
+    
     emitQuestAccepted(quest);
     res.json(quest);
   } catch (error) {
@@ -71,6 +76,9 @@ router.post('/', authenticate, isAdmin, async (req, res) => {
     
     // Index quest in Elasticsearch
     await searchService.indexQuest(quest);
+    
+    // Send notification to all users
+    await notificationService.notifyQuestCreated(quest);
     
     emitQuestCreated(quest);
     res.status(201).json(quest);
@@ -135,6 +143,9 @@ router.post('/:id/complete', authenticate, async (req, res) => {
     
     // Update quest status in Elasticsearch
     await searchService.updateQuestIndex(req.params.id);
+    
+    // Send completion notifications
+    await notificationService.notifyQuestCompleted(updatedQuest, req.user.id);
     
     emitQuestCompleted(updatedQuest);
     res.json(updatedQuest);

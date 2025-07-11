@@ -19,6 +19,7 @@ db.Quest = require('./Quest')(sequelize, DataTypes);
 db.QuestHistory = require('./QuestHistory')(sequelize, DataTypes);
 db.Achievement = require('./Achievement')(sequelize, DataTypes);
 db.UserAchievement = require('./UserAchievement')(sequelize, DataTypes);
+db.Notification = require('./Notification')(sequelize, DataTypes);
 
 // アソシエーションの設定
 Object.keys(db).forEach(modelName => {
