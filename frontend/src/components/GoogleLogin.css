@@ -17,3 +17,44 @@
   color: #666;
   margin-bottom: 30px;
 }
+
+.dev-login-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.dev-login-button {
+  padding: 12px 24px;
+  border: 2px solid #4285f4;
+  background-color: white;
+  color: #4285f4;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dev-login-button:hover {
+  background-color: #4285f4;
+  color: white;
+}
+
+.dev-login-button--admin {
+  border-color: #ea4335;
+  color: #ea4335;
+}
+
+.dev-login-button--admin:hover {
+  background-color: #ea4335;
+  color: white;
+}
+
+.dev-login-notice {
+  text-align: center;
+  color: #f59e0b;
+  font-size: 14px;
+  margin-top: 10px;
+}

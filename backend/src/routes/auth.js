@@ -3,6 +3,7 @@ const router = express.Router();
 const { OAuth2Client } = require('google-auth-library');
 const userService = require('../services/userService');
 const { authenticate } = require('../middleware/auth');
+const { DEV_MODE, devGoogleAuth } = require('../utils/devAuth');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -12,6 +13,12 @@ router.post('/google', async (req, res) => {
     
     if (!credential) {
       return res.status(400).json({ error: 'Google認証情報が必要です' });
+    }
+
+    // 開発モードのチェック
+    if (DEV_MODE && (credential === 'dev-token' || credential === 'admin-token')) {
+      const { user, token } = await devGoogleAuth(credential);
+      return res.json({ user, token });
     }
 
     const ticket = await client.verifyIdToken({
