@@ -1,13 +1,12 @@
 import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/tracing';
 
 export const initSentry = () => {
   if (process.env.REACT_APP_SENTRY_DSN) {
     Sentry.init({
       dsn: process.env.REACT_APP_SENTRY_DSN,
       integrations: [
-        new BrowserTracing(),
-        new Sentry.Replay({
+        Sentry.browserTracingIntegration(),
+        Sentry.replayIntegration({
           maskAllText: true,
           blockAllMedia: true,
         }),
@@ -23,12 +22,12 @@ export const initSentry = () => {
           const error = hint.originalException;
           
           // ネットワークエラーは送信しない
-          if (error && error.message && error.message.includes('Network Error')) {
+          if (error instanceof Error && error.message && error.message.includes('Network Error')) {
             return null;
           }
           
           // キャンセルされたリクエストは送信しない
-          if (error && error.message && error.message.includes('canceled')) {
+          if (error instanceof Error && error.message && error.message.includes('canceled')) {
             return null;
           }
         }
@@ -81,7 +80,8 @@ export const captureMessage = (
   context?: Record<string, any>
 ) => {
   if (process.env.REACT_APP_SENTRY_DSN) {
-    Sentry.captureMessage(message, level, {
+    Sentry.captureMessage(message, {
+      level,
       extra: context,
     });
   } else {

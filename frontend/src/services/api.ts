@@ -75,9 +75,9 @@ export interface Quest {
 }
 
 export interface Pagination {
-  total: number;
-  page: number;
-  limit: number;
+  totalItems: number;
+  currentPage: number;
+  itemsPerPage: number;
   totalPages: number;
 }
 

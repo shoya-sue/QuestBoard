@@ -208,8 +208,8 @@ const QuestBoard: React.FC = () => {
           setSelectedQuest({ ...updatedQuest, status: 'in_progress' });
         }
       }
-    } catch (err: any) {
-      if (err.response?.status === 401) {
+    } catch (err) {
+      if (err && typeof err === 'object' && 'response' in err && (err as any).response?.status === 401) {
         setShowAuthForm(true);
       } else {
         alert('クエストの受注に失敗しました');
@@ -223,8 +223,8 @@ const QuestBoard: React.FC = () => {
       await completeQuest(questId);
       await fetchQuests();
       setSelectedQuest(null);
-    } catch (err: any) {
-      if (err.response?.status === 403) {
+    } catch (err) {
+      if (err && typeof err === 'object' && 'response' in err && (err as any).response?.status === 403) {
         alert('このクエストを完了する権限がありません');
       } else {
         alert('クエストの完了に失敗しました');

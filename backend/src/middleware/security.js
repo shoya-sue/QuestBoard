@@ -1,49 +1,73 @@
-const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const session = require('express-session');
 
-// セキュリティヘッダー設定
-const securityHeaders = helmet({
+// レート制限の設定
+const createRateLimiter = (windowMs, max, message) => {
+  return rateLimit({
+    windowMs: windowMs || 15 * 60 * 1000, // デフォルト15分
+    max: max || 100, // デフォルト100リクエスト
+    message: message || 'リクエストが多すぎます。しばらくしてから再度お試しください。',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+};
+
+// 一般的なAPIレート制限
+const generalLimiter = createRateLimiter(
+  parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+  parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100
+);
+
+// 認証関連の厳しいレート制限
+const authLimiter = createRateLimiter(
+  15 * 60 * 1000, // 15分
+  5, // 5回まで
+  '認証リクエストが多すぎます。15分後に再度お試しください。'
+);
+
+// ファイルアップロード用のレート制限
+const uploadLimiter = createRateLimiter(
+  60 * 60 * 1000, // 1時間
+  10, // 10回まで
+  'アップロードリクエストが多すぎます。1時間後に再度お試しください。'
+);
+
+// Helmetの設定
+const helmetConfig = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'", "https://apis.google.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      scriptSrc: ["'self'", "https://accounts.google.com"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "ws://localhost:3001"],
+      connectSrc: ["'self'", "https://accounts.google.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["https://accounts.google.com"],
     },
   },
   crossOriginEmbedderPolicy: false,
 });
 
-// レート制限設定
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15分
-  max: 100, // 最大100リクエスト
-  message: 'リクエスト数が多すぎます。しばらく待ってから再試行してください。',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// 認証試行の制限
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15分
-  max: 5, // 最大5回の試行
-  skipSuccessfulRequests: true,
-  message: '認証試行回数が上限に達しました。しばらく待ってから再試行してください。',
-});
-
-// ファイルアップロード制限
-const uploadLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: 'ファイルアップロード数が上限に達しました。',
+// セッションの設定
+const sessionConfig = session({
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: parseInt(process.env.SESSION_MAX_AGE) || 24 * 60 * 60 * 1000, // 24時間
+  },
+  name: 'qb.sid', // デフォルトの'connect.sid'から変更
 });
 
 module.exports = {
-  securityHeaders,
-  apiLimiter,
+  generalLimiter,
   authLimiter,
   uploadLimiter,
-  mongoSanitize,
+  helmetConfig,
+  sessionConfig,
 };
