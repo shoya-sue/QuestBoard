@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import './QuestDetail.css';
 
 interface Quest {
@@ -9,6 +10,7 @@ interface Quest {
   reward: string;
   difficulty: string;
   mdFilePath: string;
+  acceptedBy?: string;
 }
 
 interface QuestDetailProps {
@@ -19,6 +21,7 @@ interface QuestDetailProps {
 }
 
 const QuestDetail: React.FC<QuestDetailProps> = ({ quest, onAccept, onComplete, onClose }) => {
+  const { user } = useAuth();
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'E': return '#4caf50';
@@ -99,7 +102,7 @@ const QuestDetail: React.FC<QuestDetailProps> = ({ quest, onAccept, onComplete, 
           </button>
         )}
         
-        {quest.status === 'in_progress' && (
+        {quest.status === 'in_progress' && user && quest.acceptedBy === user.id && (
           <button 
             className="action-button complete-button"
             onClick={() => onComplete(quest.id)}

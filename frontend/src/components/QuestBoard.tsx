@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import QuestCard from './QuestCard';
 import QuestDetail from './QuestDetail';
+import AuthForm from './AuthForm';
 import { getQuests, acceptQuest, completeQuest } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import './QuestBoard.css';
 
 interface Quest {
@@ -12,6 +14,7 @@ interface Quest {
   reward: string;
   difficulty: string;
   mdFilePath: string;
+  acceptedBy?: string;
 }
 
 const QuestBoard: React.FC = () => {
@@ -19,6 +22,8 @@ const QuestBoard: React.FC = () => {
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAuthForm, setShowAuthForm] = useState(false);
+  const { user, logout } = useAuth();
 
   const fetchQuests = async () => {
     try {
@@ -39,6 +44,11 @@ const QuestBoard: React.FC = () => {
   }, []);
 
   const handleAcceptQuest = async (questId: string) => {
+    if (!user) {
+      setShowAuthForm(true);
+      return;
+    }
+    
     try {
       await acceptQuest(questId);
       await fetchQuests();
@@ -48,7 +58,12 @@ const QuestBoard: React.FC = () => {
           setSelectedQuest({ ...updatedQuest, status: 'in_progress' });
         }
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        setShowAuthForm(true);
+      } else {
+        alert('クエストの受注に失敗しました');
+      }
       console.error('クエストの受注に失敗しました', err);
     }
   };
@@ -58,7 +73,12 @@ const QuestBoard: React.FC = () => {
       await completeQuest(questId);
       await fetchQuests();
       setSelectedQuest(null);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        alert('このクエストを完了する権限がありません');
+      } else {
+        alert('クエストの完了に失敗しました');
+      }
       console.error('クエストの完了に失敗しました', err);
     }
   };
@@ -71,9 +91,32 @@ const QuestBoard: React.FC = () => {
     return <div className="quest-board-error">{error}</div>;
   }
 
+  if (showAuthForm && !user) {
+    return (
+      <div className="quest-board">
+        <h1>クエストボード</h1>
+        <AuthForm onSuccess={() => setShowAuthForm(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="quest-board">
-      <h1>クエストボード</h1>
+      <div className="quest-board-header">
+        <h1>クエストボード</h1>
+        <div className="user-info">
+          {user ? (
+            <>
+              <span>ようこそ、{user.username}さん</span>
+              <button onClick={logout} className="logout-button">ログアウト</button>
+            </>
+          ) : (
+            <button onClick={() => setShowAuthForm(true)} className="login-button">
+              ログイン
+            </button>
+          )}
+        </div>
+      </div>
       <div className="quest-board-content">
         <div className="quest-list">
           <h2>クエスト一覧</h2>
