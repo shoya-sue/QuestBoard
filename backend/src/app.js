@@ -4,9 +4,11 @@ const cors = require('cors');
 const path = require('path');
 const questRoutes = require('./routes/quests');
 const authRoutes = require('./routes/auth');
+const searchRoutes = require('./routes/search');
 const socketEvents = require('./utils/socketEvents');
 const errorHandler = require('./middleware/errorHandler');
 const { initSentry, Sentry } = require('./config/sentry');
+const { initElasticsearch } = require('./config/elasticsearch');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -19,6 +21,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/quests', questRoutes);
+app.use('/api/search', searchRoutes);
 
 app.use('/data/quests', express.static(path.join(__dirname, '../data/quests')));
 
@@ -30,8 +33,11 @@ if (Sentry) {
   app.use(Sentry.Handlers.errorHandler());
 }
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
   console.log(`Quest Board backend server running on port ${PORT}`);
+  
+  // Initialize Elasticsearch
+  await initElasticsearch();
 });
 
 // WebSocket setup

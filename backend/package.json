@@ -5,9 +5,11 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "reindex": "node src/scripts/reindex.js"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^9.0.3",
     "@react-oauth/google": "^0.12.2",
     "@sentry/integrations": "^7.114.0",
     "@sentry/node": "^9.37.0",

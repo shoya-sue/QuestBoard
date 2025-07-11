@@ -7,6 +7,7 @@ import QuestFilter, { FilterOptions } from './QuestFilter';
 import Pagination from './Pagination';
 import Notification from './Notification';
 import QuestHistory from './QuestHistory';
+import SearchBar from './SearchBar';
 import { getQuests, acceptQuest, completeQuest, Pagination as PaginationType } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import socketService from '../services/socket';
@@ -43,11 +44,58 @@ const QuestBoard: React.FC = () => {
     status: '',
     searchTerm: ''
   });
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<Quest[]>([]);
   const { user, logout } = useAuth();
+
+  const handleSearch = async (query: string, searchFilters: any) => {
+    if (!query) {
+      setIsSearching(false);
+      await fetchQuests(currentPage);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      setLoading(true);
+      
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/search/quests?` + 
+        new URLSearchParams({
+          q: query,
+          page: currentPage.toString(),
+          limit: '10',
+          ...searchFilters
+        })
+      );
+      
+      if (!response.ok) throw new Error('Search failed');
+      
+      const data = await response.json();
+      setSearchResults(data.quests);
+      setFilteredQuests(data.quests);
+      setPagination({
+        currentPage: data.page,
+        totalPages: data.totalPages,
+        totalItems: data.total,
+        itemsPerPage: 10
+      });
+    } catch (error) {
+      console.error('Search error:', error);
+      setError('検索中にエラーが発生しました');
+      setNotification({
+        message: '検索中にエラーが発生しました',
+        type: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchQuests = async (page = 1) => {
     try {
       setLoading(true);
+      setIsSearching(false);
       const data = await getQuests(page);
       setQuests(data.quests);
       setPagination(data.pagination);
@@ -247,12 +295,15 @@ const QuestBoard: React.FC = () => {
         <div className="quest-board-content">
           <div className="quest-list">
             <h2>クエスト一覧</h2>
+            <SearchBar onSearch={handleSearch} showFilters={true} />
             <QuestFilter filters={filters} onFilterChange={setFilters} />
             {filteredQuests.length === 0 ? (
               <p className="no-quests">
-                {quests.length === 0 
-                  ? '現在利用可能なクエストはありません' 
-                  : '条件に一致するクエストが見つかりません'}
+                {isSearching
+                  ? '検索結果が見つかりませんでした'
+                  : quests.length === 0 
+                    ? '現在利用可能なクエストはありません' 
+                    : '条件に一致するクエストが見つかりません'}
               </p>
             ) : (
               <div className="quest-cards">

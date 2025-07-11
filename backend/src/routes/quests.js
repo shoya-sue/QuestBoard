@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const questService = require('../services/questService');
 const userService = require('../services/userService');
+const searchService = require('../services/search');
 const { authenticate, isAdmin } = require('../middleware/auth');
 const { emitQuestCreated, emitQuestUpdated, emitQuestDeleted, emitQuestAccepted, emitQuestCompleted } = require('../utils/socketEvents');
 
@@ -68,6 +69,9 @@ router.post('/', authenticate, isAdmin, async (req, res) => {
       createdBy: req.user.id
     });
     
+    // Index quest in Elasticsearch
+    await searchService.indexQuest(quest);
+    
     emitQuestCreated(quest);
     res.status(201).json(quest);
   } catch (error) {
@@ -89,6 +93,9 @@ router.put('/:id', authenticate, isAdmin, async (req, res) => {
       return res.status(404).json({ error: 'Quest not found' });
     }
     
+    // Update quest in Elasticsearch
+    await searchService.updateQuestIndex(req.params.id);
+    
     emitQuestUpdated(quest);
     res.json(quest);
   } catch (error) {
@@ -103,6 +110,9 @@ router.delete('/:id', authenticate, isAdmin, async (req, res) => {
     if (!success) {
       return res.status(404).json({ error: 'Quest not found' });
     }
+    
+    // Remove quest from Elasticsearch
+    await searchService.deleteQuestFromIndex(req.params.id);
     
     emitQuestDeleted({ id: req.params.id });
     res.json({ message: 'クエストを削除しました' });
@@ -122,6 +132,10 @@ router.post('/:id/complete', authenticate, async (req, res) => {
     }
     const updatedQuest = await questService.updateQuestStatus(req.params.id, 'completed');
     await userService.updateUserQuests(req.user.id, req.params.id, 'complete');
+    
+    // Update quest status in Elasticsearch
+    await searchService.updateQuestIndex(req.params.id);
+    
     emitQuestCompleted(updatedQuest);
     res.json(updatedQuest);
   } catch (error) {
