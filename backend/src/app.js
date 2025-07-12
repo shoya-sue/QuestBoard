@@ -6,6 +6,7 @@ const questRoutes = require('./routes/quests');
 const authRoutes = require('./routes/auth');
 const searchRoutes = require('./routes/search');
 const notificationRoutes = require('./routes/notifications');
+const userRoutes = require('./routes/users');
 const socketEvents = require('./utils/socketEvents');
 const errorHandler = require('./middleware/errorHandler');
 const { initSentry, Sentry } = require('./config/sentry');
@@ -53,6 +54,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/quests', questRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/users', userRoutes);
 
 app.use('/data/quests', express.static(path.join(__dirname, '../data/quests')));
 

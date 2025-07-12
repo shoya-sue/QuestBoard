@@ -10,11 +10,11 @@
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--color-border);
 }
 
 .quest-board-header h1 {
-  color: #333;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .logout-button,

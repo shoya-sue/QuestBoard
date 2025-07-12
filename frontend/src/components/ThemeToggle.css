@@ -1,0 +1,67 @@
+.theme-toggle {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color var(--transition-speed);
+  padding: 0;
+}
+
+.theme-toggle:hover {
+  background-color: var(--color-border-light);
+}
+
+.theme-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.theme-toggle__icon {
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-primary);
+  transition: transform var(--transition-speed), color var(--transition-speed);
+}
+
+.theme-toggle:hover .theme-toggle__icon {
+  transform: rotate(15deg);
+}
+
+.theme-toggle:active .theme-toggle__icon {
+  transform: scale(0.9);
+}
+
+/* アニメーション付きトグル */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotate(-180deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.theme-toggle__icon {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+  .theme-toggle {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .theme-toggle__icon {
+    width: 20px;
+    height: 20px;
+  }
+}
