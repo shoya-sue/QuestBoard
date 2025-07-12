@@ -7,6 +7,8 @@ export interface User {
   role: string;
   createdAt: string;
   acceptedQuests: string[];
+  avatarUrl?: string;
+  bio?: string;
 }
 
 export interface AuthResponse {

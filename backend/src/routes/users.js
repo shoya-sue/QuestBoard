@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models');
+const { User, Quest } = require('../models');
 const { authenticate, isAdmin } = require('../middleware/auth');
+const { Op } = require('sequelize');
 
 // ユーザー一覧取得（管理者のみ）
 router.get('/', authenticate, isAdmin, async (req, res) => {
@@ -99,8 +100,59 @@ router.get('/profile/:id', authenticate, async (req, res) => {
   }
 });
 
+// ユーザー統計情報取得
+router.get('/:id/stats', authenticate, async (req, res) => {
+  try {
+    const userId = req.params.id === 'me' ? req.user.id : req.params.id;
+    
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'ユーザーが見つかりません' });
+    }
+
+    // 完了したクエスト数を取得
+    const completedQuestsCount = await Quest.count({
+      where: {
+        acceptedBy: userId,
+        status: 'completed'
+      }
+    });
+
+    // 獲得ポイントを計算（仮実装）
+    const totalPoints = completedQuestsCount * 100;
+
+    // ランクを決定
+    let rank = 'ブロンズ';
+    if (totalPoints >= 5000) rank = 'マスター';
+    else if (totalPoints >= 3000) rank = 'プラチナ';
+    else if (totalPoints >= 1500) rank = 'ゴールド';
+    else if (totalPoints >= 500) rank = 'シルバー';
+
+    // 実績データ（仮実装）
+    const achievements = [
+      { id: '1', name: '初めての冒険', description: '最初のクエストを完了', icon: '⚔️', unlockedAt: completedQuestsCount > 0 ? new Date().toISOString() : null },
+      { id: '2', name: 'クエストマスター', description: '10個のクエストを完了', icon: '🏆', unlockedAt: completedQuestsCount >= 10 ? new Date().toISOString() : null },
+      { id: '3', name: '伝説の冒険者', description: '50個のクエストを完了', icon: '⭐', unlockedAt: completedQuestsCount >= 50 ? new Date().toISOString() : null },
+      { id: '4', name: '早起きは三文の徳', description: '朝6時前にクエストを完了', icon: '🌅', unlockedAt: null },
+      { id: '5', name: '夜の番人', description: '深夜にクエストを完了', icon: '🌙', unlockedAt: null },
+      { id: '6', name: '連続達成', description: '7日連続でクエストを完了', icon: '🔥', unlockedAt: null }
+    ];
+
+    res.json({
+      completedQuests: completedQuestsCount,
+      totalPoints,
+      rank,
+      joinedDate: user.createdAt.toLocaleDateString('ja-JP'),
+      achievements
+    });
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    res.status(500).json({ error: '統計情報の取得に失敗しました' });
+  }
+});
+
 // ユーザープロフィール更新
-router.put('/profile', authenticate, async (req, res) => {
+router.patch('/:id/profile', authenticate, async (req, res) => {
   try {
     const { username, bio, profilePicture } = req.body;
     

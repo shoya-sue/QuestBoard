@@ -10,6 +10,7 @@ import QuestHistory from './QuestHistory';
 import SearchBar from './SearchBar';
 import NotificationCenter from './NotificationCenter';
 import ThemeToggle from './ThemeToggle';
+import UserProfile from './UserProfile';
 import { getQuests, acceptQuest, completeQuest, Pagination as PaginationType } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import socketService from '../services/socket';
@@ -35,6 +36,7 @@ const QuestBoard: React.FC = () => {
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationType | null>(null);
   const [notification, setNotification] = useState<{
@@ -269,14 +271,32 @@ const QuestBoard: React.FC = () => {
               <NotificationCenter />
               <ThemeToggle />
               <button 
-                onClick={() => setShowHistory(!showHistory)} 
+                onClick={() => {
+                  setShowProfile(true);
+                  setShowHistory(false);
+                  setShowAdminPanel(false);
+                }} 
+                className="profile-button"
+              >
+                プロフィール
+              </button>
+              <button 
+                onClick={() => {
+                  setShowHistory(!showHistory);
+                  setShowProfile(false);
+                  setShowAdminPanel(false);
+                }} 
                 className="history-button"
               >
                 {showHistory ? 'クエスト一覧' : '完了履歴'}
               </button>
               {user.role === 'admin' && (
                 <button 
-                  onClick={() => setShowAdminPanel(!showAdminPanel)} 
+                  onClick={() => {
+                    setShowAdminPanel(!showAdminPanel);
+                    setShowProfile(false);
+                    setShowHistory(false);
+                  }} 
                   className="admin-button"
                 >
                   {showAdminPanel ? 'クエスト一覧' : '管理画面'}
@@ -295,6 +315,8 @@ const QuestBoard: React.FC = () => {
         <AdminPanel />
       ) : showHistory && user ? (
         <QuestHistory userId={user.id} />
+      ) : showProfile && user ? (
+        <UserProfile />
       ) : (
         <div className="quest-board-content">
           <div className="quest-list">
