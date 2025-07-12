@@ -1,0 +1,132 @@
+.pwa-install-prompt {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  max-width: 90%;
+  width: 400px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.pwa-install-prompt__content {
+  background-color: var(--color-background-secondary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.pwa-install-prompt__icon {
+  flex-shrink: 0;
+}
+
+.pwa-install-prompt__icon img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+.pwa-install-prompt__text {
+  flex: 1;
+}
+
+.pwa-install-prompt__text h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.pwa-install-prompt__text p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.pwa-install-prompt__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pwa-install-prompt__dismiss,
+.pwa-install-prompt__install {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pwa-install-prompt__dismiss {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+.pwa-install-prompt__dismiss:hover {
+  background-color: var(--color-border-light);
+}
+
+.pwa-install-prompt__install {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.pwa-install-prompt__install:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+}
+
+/* モバイル対応 */
+@media (max-width: 480px) {
+  .pwa-install-prompt {
+    bottom: 10px;
+    width: calc(100% - 20px);
+    max-width: none;
+  }
+
+  .pwa-install-prompt__content {
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .pwa-install-prompt__icon img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .pwa-install-prompt__text h3 {
+    font-size: 15px;
+  }
+
+  .pwa-install-prompt__text p {
+    font-size: 13px;
+  }
+
+  .pwa-install-prompt__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .pwa-install-prompt__dismiss,
+  .pwa-install-prompt__install {
+    width: 100%;
+    text-align: center;
+  }
+}
