@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import TwoFactorSetup from './TwoFactorSetup';
 import './UserProfile.css';
 
 interface UserStats {
@@ -28,6 +29,8 @@ const UserProfile: React.FC = () => {
     avatarUrl: user?.avatarUrl || ''
   });
   const [loading, setLoading] = useState(true);
+  const [show2FASetup, setShow2FASetup] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
 
   useEffect(() => {
     fetchUserStats();
@@ -198,7 +201,42 @@ const UserProfile: React.FC = () => {
               ))}
             </div>
           </div>
+
+          <div className="user-profile__security">
+            <h3>セキュリティ設定</h3>
+            <div className="security-item">
+              <div className="security-info">
+                <h4>2段階認証</h4>
+                <p>アカウントのセキュリティを強化します</p>
+              </div>
+              <div className="security-status">
+                {twoFactorEnabled ? (
+                  <>
+                    <span className="status-enabled">✅ 有効</span>
+                    <button className="manage-2fa-btn">管理</button>
+                  </>
+                ) : (
+                  <button 
+                    className="enable-2fa-btn"
+                    onClick={() => setShow2FASetup(true)}
+                  >
+                    有効にする
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </>
+      )}
+
+      {show2FASetup && (
+        <TwoFactorSetup
+          onClose={() => setShow2FASetup(false)}
+          onSuccess={() => {
+            setTwoFactorEnabled(true);
+            setShow2FASetup(false);
+          }}
+        />
       )}
     </div>
   );

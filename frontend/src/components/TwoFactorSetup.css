@@ -1,0 +1,346 @@
+.two-factor-setup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.two-factor-setup {
+  background-color: var(--color-background-secondary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.two-factor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.two-factor-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--color-text-primary);
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.close-button:hover {
+  background-color: var(--color-border-light);
+  color: var(--color-text-primary);
+}
+
+.setup-step,
+.verify-step,
+.complete-step {
+  padding: 30px;
+}
+
+.step-description {
+  margin-bottom: 30px;
+}
+
+.step-description p {
+  margin: 0 0 10px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.app-recommendations {
+  background-color: var(--color-background);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.app-recommendations h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: var(--color-text-primary);
+}
+
+.app-recommendations ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--color-text-secondary);
+}
+
+.app-recommendations li {
+  margin-bottom: 5px;
+}
+
+.error-message {
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.setup-actions,
+.verify-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.primary-button,
+.secondary-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.primary-button {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  background-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.secondary-button:hover {
+  background-color: var(--color-border-light);
+}
+
+.qr-section {
+  margin-bottom: 30px;
+}
+
+.qr-section h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: var(--color-text-primary);
+}
+
+.qr-section p {
+  margin: 0 0 15px;
+  color: var(--color-text-secondary);
+}
+
+.qr-code {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-bottom: 15px;
+}
+
+.qr-code img {
+  display: block;
+  width: 200px;
+  height: 200px;
+}
+
+.manual-entry {
+  margin-top: 15px;
+}
+
+.manual-entry summary {
+  cursor: pointer;
+  color: var(--color-primary);
+  font-size: 14px;
+  user-select: none;
+}
+
+.manual-key {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: var(--color-background);
+  border-radius: 6px;
+}
+
+.manual-key p {
+  margin: 0 0 10px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.manual-key code {
+  display: block;
+  padding: 10px;
+  background-color: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 14px;
+  word-break: break-all;
+  user-select: all;
+}
+
+.verify-section h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: var(--color-text-primary);
+}
+
+.verify-section p {
+  margin: 0 0 15px;
+  color: var(--color-text-secondary);
+}
+
+.token-input {
+  width: 200px;
+  padding: 15px;
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 10px;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-family: monospace;
+}
+
+.token-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.success-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.complete-step h3 {
+  text-align: center;
+  margin: 0 0 30px;
+  font-size: 20px;
+  color: var(--color-text-primary);
+}
+
+.backup-codes-section {
+  background-color: var(--color-background);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.backup-codes-section h4 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: var(--color-text-primary);
+}
+
+.backup-codes-section p {
+  margin: 0 0 10px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.backup-codes-section .warning {
+  color: var(--color-warning);
+  font-weight: 500;
+}
+
+.backup-codes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.backup-codes code {
+  padding: 8px;
+  background-color: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 14px;
+  text-align: center;
+  user-select: all;
+}
+
+.download-button {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--color-secondary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.download-button:hover {
+  background-color: #218838;
+}
+
+/* モバイル対応 */
+@media (max-width: 600px) {
+  .two-factor-setup {
+    margin: 10px;
+  }
+
+  .setup-step,
+  .verify-step,
+  .complete-step {
+    padding: 20px;
+  }
+
+  .qr-code {
+    text-align: center;
+  }
+
+  .qr-code img {
+    width: 160px;
+    height: 160px;
+  }
+
+  .token-input {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .backup-codes {
+    grid-template-columns: 1fr;
+  }
+}

@@ -55,6 +55,7 @@ app.use('/api/quests', questRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/2fa', require('./routes/twoFA'));
 
 app.use('/data/quests', express.static(path.join(__dirname, '../data/quests')));
 
