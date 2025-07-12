@@ -154,4 +154,91 @@ router.post('/:id/complete', authenticate, async (req, res) => {
   }
 });
 
+// クエスト評価統計取得
+router.get('/:id/ratings/stats', async (req, res) => {
+  try {
+    const questId = req.params.id;
+    const userId = req.user?.id;
+    
+    // 評価の集計データを取得（仮実装）
+    const ratings = await questService.getQuestRatings(questId);
+    
+    let totalRating = 0;
+    let userRating = null;
+    const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    
+    ratings.forEach(rating => {
+      totalRating += rating.rating;
+      distribution[rating.rating]++;
+      if (userId && rating.userId === userId) {
+        userRating = rating.rating;
+      }
+    });
+    
+    const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
+    
+    res.json({
+      averageRating,
+      totalRatings: ratings.length,
+      userRating,
+      distribution
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// クエスト評価一覧取得
+router.get('/:id/ratings', async (req, res) => {
+  try {
+    const questId = req.params.id;
+    const ratings = await questService.getQuestRatings(questId);
+    
+    // ユーザー名を追加（仮実装）
+    const ratingsWithUsernames = ratings.map(rating => ({
+      ...rating,
+      username: rating.username || '冒険者' + rating.userId.substring(0, 4)
+    }));
+    
+    res.json({ ratings: ratingsWithUsernames });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// クエスト評価投稿
+router.post('/:id/ratings', authenticate, async (req, res) => {
+  try {
+    const questId = req.params.id;
+    const userId = req.user.id;
+    const { rating, comment } = req.body;
+    
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: '評価は1から5の間で入力してください' });
+    }
+    
+    // 既存の評価をチェック
+    const existingRating = await questService.getUserQuestRating(questId, userId);
+    if (existingRating) {
+      return res.status(400).json({ error: 'すでにこのクエストを評価しています' });
+    }
+    
+    // 評価を保存
+    const newRating = await questService.createQuestRating({
+      questId,
+      userId,
+      rating,
+      comment: comment || null,
+      createdAt: new Date().toISOString()
+    });
+    
+    res.json({ 
+      message: '評価を投稿しました',
+      rating: newRating 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

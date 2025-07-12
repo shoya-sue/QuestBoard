@@ -194,6 +194,42 @@ class QuestService {
     
     return completedQuests;
   }
+
+  // 評価関連のメソッド（仮実装）
+  async getQuestRatings(questId) {
+    const quest = this.quests.find(q => q.id === questId);
+    if (!quest) {
+      throw new Error('クエストが見つかりません');
+    }
+    
+    return quest.ratings || [];
+  }
+
+  async getUserQuestRating(questId, userId) {
+    const ratings = await this.getQuestRatings(questId);
+    return ratings.find(r => r.userId === userId);
+  }
+
+  async createQuestRating(ratingData) {
+    const quest = this.quests.find(q => q.id === ratingData.questId);
+    if (!quest) {
+      throw new Error('クエストが見つかりません');
+    }
+    
+    if (!quest.ratings) {
+      quest.ratings = [];
+    }
+    
+    const newRating = {
+      id: Date.now().toString(),
+      ...ratingData
+    };
+    
+    quest.ratings.push(newRating);
+    await this.updateQuestData(quest.id, quest);
+    
+    return newRating;
+  }
 }
 
 module.exports = new QuestService();

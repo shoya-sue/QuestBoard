@@ -8,6 +8,8 @@ interface Quest {
   status: 'available' | 'in_progress' | 'completed';
   reward: string;
   difficulty: string;
+  averageRating?: number;
+  totalRatings?: number;
 }
 
 interface QuestCardProps {
@@ -72,6 +74,17 @@ const QuestCard: React.FC<QuestCardProps> = ({ quest, onClick, selected }) => {
           {getStatusText(quest.status)}
         </span>
       </div>
+      {quest.averageRating !== undefined && quest.totalRatings !== undefined && quest.totalRatings > 0 && (
+        <div className="quest-card-rating">
+          <span className="rating-stars">
+            {'★'.repeat(Math.round(quest.averageRating))}
+            {'☆'.repeat(5 - Math.round(quest.averageRating))}
+          </span>
+          <span className="rating-info">
+            {quest.averageRating.toFixed(1)} ({quest.totalRatings}件)
+          </span>
+        </div>
+      )}
     </div>
   );
 };

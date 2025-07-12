@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import QuestRating from './QuestRating';
 import './QuestDetail.css';
 
 interface Quest {
@@ -120,6 +121,8 @@ const QuestDetail: React.FC<QuestDetailProps> = ({ quest, onAccept, onComplete, 
           詳細ファイルを表示
         </a>
       </div>
+      
+      <QuestRating questId={quest.id} />
     </div>
   );
 };

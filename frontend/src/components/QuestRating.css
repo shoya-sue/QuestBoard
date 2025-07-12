@@ -1,0 +1,271 @@
+.quest-rating {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: var(--color-background-secondary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.quest-rating-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-secondary);
+}
+
+.rating-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.rating-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--color-text-primary);
+}
+
+.add-rating-btn {
+  padding: 6px 16px;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-rating-btn:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.rating-stats {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.average-rating {
+  text-align: center;
+  padding: 20px;
+  background-color: var(--color-background);
+  border-radius: 8px;
+}
+
+.rating-value {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.stars {
+  font-size: 24px;
+  color: var(--color-text-tertiary);
+  user-select: none;
+}
+
+.stars.interactive {
+  cursor: pointer;
+}
+
+.star {
+  transition: color 0.2s;
+}
+
+.star.filled {
+  color: #ffa500;
+}
+
+.stars.interactive .star:hover,
+.stars.interactive .star:hover ~ .star {
+  color: var(--color-text-tertiary) !important;
+}
+
+.stars.interactive:hover .star {
+  color: #ffa500;
+}
+
+.rating-count {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.rating-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.distribution-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  gap: 10px;
+}
+
+.rating-label {
+  text-align: right;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.distribution-bar {
+  height: 20px;
+  background-color: var(--color-background);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.distribution-fill {
+  height: 100%;
+  background-color: #ffa500;
+  transition: width 0.3s ease;
+}
+
+.rating-form {
+  padding: 20px;
+  background-color: var(--color-background);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.rating-form-stars {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.rating-form-stars label {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.rating-comment {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid var(--color-border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 15px;
+}
+
+.rating-form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.submit-rating,
+.cancel-rating {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submit-rating {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+.submit-rating:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.submit-rating:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancel-rating {
+  background-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.cancel-rating:hover {
+  background-color: var(--color-border-light);
+}
+
+.rating-list {
+  margin-top: 30px;
+}
+
+.rating-list h4 {
+  margin: 0 0 15px;
+  font-size: 16px;
+  color: var(--color-text-primary);
+}
+
+.rating-item {
+  padding: 15px;
+  background-color: var(--color-background);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.rating-item-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 8px;
+}
+
+.rating-username {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.rating-date {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.rating-comment-text {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+  .rating-stats {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .average-rating {
+    padding: 15px;
+  }
+
+  .rating-value {
+    font-size: 36px;
+  }
+
+  .stars {
+    font-size: 20px;
+  }
+
+  .rating-item-header {
+    flex-wrap: wrap;
+  }
+
+  .rating-date {
+    margin-left: 0;
+    width: 100%;
+    margin-top: 5px;
+  }
+}

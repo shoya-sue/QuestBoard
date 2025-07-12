@@ -101,3 +101,24 @@
     font-size: 13px;
   }
 }
+
+/* 評価表示のスタイル */
+.quest-card-rating {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.rating-stars {
+  color: #ffa500;
+  letter-spacing: 2px;
+}
+
+.rating-info {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
