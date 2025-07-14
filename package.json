@@ -1,0 +1,125 @@
+{
+  "name": "questboard",
+  "version": "3.0.0",
+  "description": "RPGゲームの世界観を再現したエンタープライズレベルのクエスト管理システム",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:coverage": "npm run test:coverage:backend && npm run test:coverage:frontend",
+    "test:coverage:backend": "cd backend && npm run test:coverage",
+    "test:coverage:frontend": "cd frontend && npm run test:coverage",
+    "test:e2e": "cd backend && npm run test:e2e",
+    "test:performance": "cd backend && npm run test:performance",
+    "install:all": "npm install && npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:fix": "npm run lint:fix:backend && npm run lint:fix:frontend",
+    "lint:fix:backend": "cd backend && npm run lint:fix",
+    "lint:fix:frontend": "cd frontend && npm run lint:fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,yml,yaml}\"",
+    "db:setup": "cd backend && npm run db:setup",
+    "db:migrate": "cd backend && npm run db:migrate",
+    "db:seed": "cd backend && npm run db:seed",
+    "db:reset": "cd backend && npm run db:reset",
+    "db:test": "cd backend && npm run db:test",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "k8s:deploy": "./scripts/k8s-deploy.sh",
+    "k8s:status": "kubectl get pods,svc,ingress",
+    "terraform:init": "cd terraform && terraform init",
+    "terraform:plan": "cd terraform && terraform plan -var-file=environments/production.tfvars",
+    "terraform:apply": "cd terraform && terraform apply -var-file=environments/production.tfvars",
+    "terraform:destroy": "cd terraform && terraform destroy -var-file=environments/production.tfvars",
+    "security:audit": "node security/security-audit.js",
+    "security:pentest": "node security/penetration-test.js",
+    "security:test": "./security/run-security-tests.sh",
+    "backup:create": "./scripts/backup.sh full",
+    "backup:restore": "./scripts/backup.sh restore",
+    "backup:test": "./scripts/backup.sh test-restore",
+    "monitoring:setup": "./scripts/monitoring-setup.sh",
+    "monitoring:start": "docker-compose -f docker-compose.monitoring.yml up -d",
+    "monitoring:stop": "docker-compose -f docker-compose.monitoring.yml down",
+    "health:check": "./scripts/health-check.sh",
+    "deploy:staging": "npm run build && npm run docker:build && npm run k8s:deploy",
+    "deploy:prod": "npm run test && npm run security:test && npm run build && npm run k8s:deploy",
+    "create-admin": "cd backend && node src/scripts/createAdmin.js",
+    "profile": "cd backend && node --prof src/app.js",
+    "clean": "rm -rf node_modules backend/node_modules frontend/node_modules frontend/build backend/dist",
+    "update-deps": "npm update && cd backend && npm update && cd ../frontend && npm update"
+  },
+  "keywords": [
+    "quest",
+    "board",
+    "rpg",
+    "management",
+    "system",
+    "react",
+    "nodejs",
+    "postgresql",
+    "kubernetes",
+    "aws",
+    "enterprise",
+    "microservices",
+    "pwa",
+    "real-time",
+    "websocket"
+  ],
+  "author": "Quest Board Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shoya-sue/QuestBoard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shoya-sue/QuestBoard/issues"
+  },
+  "homepage": "https://questboard.com",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "prettier": "^3.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run test && npm run security:audit"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "config": {
+    "dockerRegistry": "your-ecr-registry.amazonaws.com",
+    "kubernetesNamespace": "questboard",
+    "monitoringEnabled": true,
+    "securityScanEnabled": true
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
