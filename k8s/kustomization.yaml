@@ -1,0 +1,65 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: questboard
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.yaml
+  - postgres.yaml
+  - redis.yaml
+  - elasticsearch.yaml
+  - backend.yaml
+  - frontend.yaml
+  - ingress.yaml
+  - hpa.yaml
+  - network-policy.yaml
+
+images:
+  - name: ghcr.io/your-org/questboard-backend
+    newTag: latest
+  - name: ghcr.io/your-org/questboard-frontend
+    newTag: latest
+
+configMapGenerator:
+  - name: questboard-config-env
+    behavior: merge
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+
+secretGenerator:
+  - name: questboard-secrets-env
+    behavior: merge
+    envs:
+      - .env.production
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: backend
+      namespace: questboard
+    spec:
+      replicas: 3
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: frontend
+      namespace: questboard
+    spec:
+      replicas: 3
+
+commonLabels:
+  app.kubernetes.io/name: questboard
+  app.kubernetes.io/instance: production
+  app.kubernetes.io/component: web
+  app.kubernetes.io/part-of: questboard
+  app.kubernetes.io/managed-by: kustomize
+
+commonAnnotations:
+  version: "1.0.0"
+  environment: production

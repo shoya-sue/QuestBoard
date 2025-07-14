@@ -1,0 +1,49 @@
+# Node.js 公式イメージを使用
+FROM node:18-alpine AS base
+
+# 必要なシステムパッケージをインストール
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+# 依存関係のインストール用ステージ
+FROM base AS deps
+COPY backend/package*.json ./
+RUN npm ci --only=production
+
+# 開発用依存関係も含めてインストール
+FROM base AS dev-deps
+COPY backend/package*.json ./
+RUN npm ci
+
+# ビルドステージ
+FROM base AS builder
+COPY backend/ ./
+COPY --from=dev-deps /app/node_modules ./node_modules
+# ビルドが必要な場合はここで実行
+
+# 本番環境用ステージ
+FROM base AS runner
+ENV NODE_ENV production
+
+# セキュリティのためのユーザー作成
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/data ./data
+COPY --from=deps /app/node_modules ./node_modules
+COPY backend/package*.json ./
+
+# ログディレクトリの作成と権限設定
+RUN mkdir -p logs && chown -R nodejs:nodejs /app
+
+USER nodejs
+
+EXPOSE 3001
+
+# ヘルスチェック
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/api/docs/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"
+
+CMD ["node", "src/app.js"]

@@ -7,15 +7,20 @@ const authRoutes = require('./routes/auth');
 const searchRoutes = require('./routes/search');
 const notificationRoutes = require('./routes/notifications');
 const userRoutes = require('./routes/users');
+const docsRoutes = require('./routes/docs');
 const socketEvents = require('./utils/socketEvents');
 const errorHandler = require('./middleware/errorHandler');
 const { initSentry, Sentry } = require('./config/sentry');
 const { initElasticsearch } = require('./config/elasticsearch');
 const { initEmail, verifyConnection } = require('./config/email');
 const { generalLimiter, authLimiter, helmetConfig, sessionConfig } = require('./middleware/security');
+const { httpMetricsMiddleware, metricsHandler, initializeMetrics } = require('./utils/metrics');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialize metrics
+initializeMetrics();
 
 // Initialize Sentry
 initSentry(app);
@@ -46,6 +51,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// HTTPメトリクス収集
+app.use(httpMetricsMiddleware);
+
 // APIレート制限
 app.use('/api/', generalLimiter);
 
@@ -56,8 +64,43 @@ app.use('/api/search', searchRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/2fa', require('./routes/twoFA'));
+app.use('/api/docs', docsRoutes);
+app.use('/api/admin', require('./routes/admin'));
 
 app.use('/data/quests', express.static(path.join(__dirname, '../data/quests')));
+
+// API仕様書へのリダイレクト
+app.get('/docs', (req, res) => {
+  res.redirect('/api/docs');
+});
+
+// メトリクスエンドポイント
+app.get('/metrics', metricsHandler);
+
+// ルートパスでのAPI情報表示
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Quest Board API',
+    version: '1.0.0',
+    description: 'RPG風クエスト管理システムのAPI',
+    documentation: {
+      swagger: '/api/docs',
+      redoc: '/api/docs/redoc',
+      json: '/api/docs/json',
+      yaml: '/api/docs/yaml'
+    },
+    endpoints: {
+      authentication: '/api/auth',
+      quests: '/api/quests',
+      users: '/api/users',
+      search: '/api/search',
+      notifications: '/api/notifications',
+      twoFA: '/api/2fa',
+      health: '/api/docs/health',
+      metrics: '/metrics'
+    }
+  });
+});
 
 // 改善されたエラーハンドリングミドルウェア
 app.use(errorHandler);
@@ -88,11 +131,16 @@ const io = require('socket.io')(server, {
   }
 });
 
+// WebSocket接続メトリクス
+const { websocketConnections } = require('./utils/metrics');
+
 io.on('connection', (socket) => {
   console.log('New client connected');
+  websocketConnections.inc();
   
   socket.on('disconnect', () => {
     console.log('Client disconnected');
+    websocketConnections.dec();
   });
 });
 

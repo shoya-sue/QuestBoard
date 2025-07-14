@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-07-14T09:18:24.133Z",
+  "score": 45,
+  "maxScore": 45,
+  "percentage": 100,
+  "vulnerabilities": [
+    {
+      "severity": "medium",
+      "message": "XSS脆弱性の可能性: /var/www/vhosts/QuestBoard/frontend/build/static/js/main.aa9b7779.js"
+    },
+    {
+      "severity": "critical",
+      "message": "パスワードハッシュ化が実装されていません"
+    },
+    {
+      "severity": "medium",
+      "message": "機密情報がログに出力される可能性: /var/www/vhosts/QuestBoard/backend/src/scripts/createAdmin.js"
+    },
+    {
+      "severity": "medium",
+      "message": "機密情報がログに出力される可能性: /var/www/vhosts/QuestBoard/scripts/secure-env.js"
+    },
+    {
+      "severity": "medium",
+      "message": "機密情報がログに出力される可能性: /var/www/vhosts/QuestBoard/setup-dev-auth.js"
+    }
+  ],
+  "warnings": [
+    "CSRF保護が実装されていない可能性があります",
+    "JWT署名の実装が確認できませんでした",
+    "2要素認証が実装されていません",
+    "本番環境で危険な設定が含まれている可能性: .env.example",
+    "HTTPSリダイレクトが設定されていません",
+    "HSTSヘッダーが設定されていません",
+    "セキュアCookieが設定されていません",
+    "入力検証の実装が確認できませんでした",
+    "入力サニタイゼーションの実装が確認できませんでした",
+    "ファイル権限が適切でない可能性: scripts/backup.sh (755)"
+  ],
+  "info": [
+    "ソースコードにシークレットは見つかりませんでした",
+    "SQLインジェクション脆弱性は見つかりませんでした",
+    "Dockerで非rootユーザーが使用されています"
+  ]
+}

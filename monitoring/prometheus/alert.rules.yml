@@ -1,0 +1,142 @@
+groups:
+  - name: questboard_alerts
+    interval: 30s
+    rules:
+      # インスタンスダウン
+      - alert: InstanceDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
+
+      # CPU使用率高
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% (current value: {{ $value }}%)"
+
+      # メモリ使用率高
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% (current value: {{ $value }}%)"
+
+      # ディスク使用率高
+      - alert: HighDiskUsage
+        expr: |
+          (node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs"} - node_filesystem_free_bytes{fstype!~"tmpfs|fuse.lxcfs"}) / node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs"} * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk usage detected"
+          description: "Disk usage is above 80% on {{ $labels.mountpoint }} (current value: {{ $value }}%)"
+
+      # PostgreSQLダウン
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database is not responding"
+
+      # PostgreSQL接続数高
+      - alert: PostgreSQLHighConnections
+        expr: |
+          pg_stat_database_numbackends / pg_settings_max_connections * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL high connection count"
+          description: "PostgreSQL connection usage is above 80% (current value: {{ $value }}%)"
+
+      # Redisダウン
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis server is not responding"
+
+      # Redisメモリ使用率高
+      - alert: RedisHighMemoryUsage
+        expr: |
+          redis_memory_used_bytes / redis_memory_max_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is above 90% (current value: {{ $value }}%)"
+
+      # Elasticsearchクラスターヘルス
+      - alert: ElasticsearchClusterRed
+        expr: elasticsearch_cluster_health_status{color="red"} == 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Elasticsearch cluster is red"
+          description: "Elasticsearch cluster health is red"
+
+      # APIレスポンスタイム高
+      - alert: HighAPIResponseTime
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, method, route)) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API response time"
+          description: "95th percentile API response time is above 2 seconds for {{ $labels.method }} {{ $labels.route }}"
+
+      # APIエラー率高
+      - alert: HighAPIErrorRate
+        expr: |
+          sum(rate(http_request_total{status=~"5.."}[5m])) by (method, route) / sum(rate(http_request_total[5m])) by (method, route) * 100 > 5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API error rate"
+          description: "API error rate is above 5% for {{ $labels.method }} {{ $labels.route }} (current value: {{ $value }}%)"
+
+      # コンテナ再起動
+      - alert: ContainerRestarting
+        expr: |
+          rate(container_restart_count[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container is restarting"
+          description: "Container {{ $labels.name }} has been restarting"
+
+      # ログエラー率高
+      - alert: HighLogErrorRate
+        expr: |
+          sum(rate(log_messages_total{level="error"}[5m])) by (service) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error log rate"
+          description: "Service {{ $labels.service }} is logging more than 10 errors per second"

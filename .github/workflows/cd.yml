@@ -1,0 +1,162 @@
+name: CD - Production Deployment
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
+    branches:
+      - main
+
+env:
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.questboard.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Deploy to ECS Staging
+        run: |
+          # Update ECS task definition with new image
+          aws ecs update-service \
+            --cluster questboard-staging \
+            --service questboard-app \
+            --force-new-deployment \
+            --desired-count 2
+
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster questboard-staging \
+            --services questboard-app
+
+      - name: Run smoke tests
+        run: |
+          # Basic health check
+          curl -f https://staging.questboard.example.com/api/docs/health || exit 1
+          
+          # Additional smoke tests
+          npm run test:smoke -- --url=https://staging.questboard.example.com
+
+  deploy-production:
+    name: Deploy to Production
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://questboard.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Blue/Green Deployment
+        run: |
+          # スクリプトを実行
+          ./scripts/blue-green-deploy.sh production
+
+      - name: Run health checks
+        run: |
+          # Production health checks
+          ./scripts/health-check.sh production
+
+      - name: Create release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            ## Changes in this Release
+            - Automated deployment from commit ${{ github.sha }}
+            - [View changes](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.sha }})
+          draft: false
+          prerelease: false
+
+      - name: Notify deployment
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: |
+            Production deployment ${{ job.status }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  rollback:
+    name: Rollback Production
+    if: failure()
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Rollback deployment
+        run: |
+          # Get previous task definition
+          PREVIOUS_TASK_DEF=$(aws ecs describe-services \
+            --cluster questboard-production \
+            --services questboard-app \
+            --query 'services[0].deployments[1].taskDefinition' \
+            --output text)
+          
+          # Update service with previous version
+          aws ecs update-service \
+            --cluster questboard-production \
+            --service questboard-app \
+            --task-definition $PREVIOUS_TASK_DEF \
+            --force-new-deployment
+
+      - name: Notify rollback
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              text: "⚠️ Production deployment rolled back",
+              attachments: [{
+                color: 'warning',
+                text: 'Automatic rollback triggered due to deployment failure'
+              }]
+            }
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
