@@ -1,0 +1,110 @@
+version: '3.8'
+
+# E2Eテスト用のDocker Compose設定
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: questboard_e2e
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass testpass
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "testpass", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      NODE_ENV: test
+      PORT: 3001
+      JWT_SECRET: e2e-test-jwt-secret
+      GOOGLE_CLIENT_ID: test-google-client-id
+      ADMIN_EMAILS: admin@test.com
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: testpass
+      DB_NAME: questboard_e2e
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: testpass
+      ELASTICSEARCH_NODE: http://elasticsearch:9200
+      LOG_LEVEL: debug
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/api/docs/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: >
+      sh -c "
+        npm run migrate &&
+        npm run seed:test &&
+        npm start
+      "
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        REACT_APP_API_URL: http://backend:3001/api
+        REACT_APP_WS_URL: ws://backend:3001
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cypress:
+    image: cypress/included:13.6.0
+    depends_on:
+      frontend:
+        condition: service_healthy
+    environment:
+      CYPRESS_baseUrl: http://frontend
+      CYPRESS_API_URL: http://backend:3001/api
+    working_dir: /e2e
+    volumes:
+      - ./e2e:/e2e
+      - ./e2e/cypress/videos:/e2e/cypress/videos
+      - ./e2e/cypress/screenshots:/e2e/cypress/screenshots
+    command: cypress run --spec "cypress/e2e/**/*.cy.js"
+
+networks:
+  default:
+    name: questboard-e2e-network

@@ -1,0 +1,112 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alertmanager@questboard.com'
+  smtp_auth_username: '{{ ALERT_EMAIL_USER }}'
+  smtp_auth_password: '{{ ALERT_EMAIL_PASSWORD }}'
+  slack_api_url: '{{ SLACK_WEBHOOK_URL }}'
+
+# テンプレート
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# ルーティング設定
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+  
+  routes:
+    # Critical アラートは即座に通知
+    - match:
+        severity: critical
+      receiver: 'critical'
+      group_wait: 0s
+      repeat_interval: 1h
+      
+    # データベース関連
+    - match_re:
+        alertname: '^(PostgreSQL|Redis|Elasticsearch).*'
+      receiver: 'database-team'
+      
+    # API関連
+    - match_re:
+        alertname: '^(HighAPI|API).*'
+      receiver: 'api-team'
+      
+    # インフラ関連
+    - match_re:
+        alertname: '^(High|Instance|Container).*'
+      receiver: 'infra-team'
+
+# 受信者設定
+receivers:
+  # デフォルト受信者
+  - name: 'default'
+    slack_configs:
+      - channel: '#questboard-alerts'
+        title: 'QuestBoard Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        send_resolved: true
+
+  # Critical アラート受信者
+  - name: 'critical'
+    slack_configs:
+      - channel: '#questboard-critical'
+        title: '🚨 CRITICAL: QuestBoard Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+    email_configs:
+      - to: 'oncall@questboard.com'
+        headers:
+          Subject: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+    pagerduty_configs:
+      - service_key: '{{ PAGERDUTY_SERVICE_KEY }}'
+        description: '{{ .CommonAnnotations.summary }}'
+
+  # データベースチーム
+  - name: 'database-team'
+    slack_configs:
+      - channel: '#questboard-database'
+        title: 'Database Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
+    email_configs:
+      - to: 'database-team@questboard.com'
+
+  # APIチーム
+  - name: 'api-team'
+    slack_configs:
+      - channel: '#questboard-api'
+        title: 'API Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
+
+  # インフラチーム
+  - name: 'infra-team'
+    slack_configs:
+      - channel: '#questboard-infra'
+        title: 'Infrastructure Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
+    email_configs:
+      - to: 'infra-team@questboard.com'
+
+# 抑制ルール
+inhibit_rules:
+  # インスタンスがダウンしている場合、その他のアラートを抑制
+  - source_match:
+      severity: 'critical'
+      alertname: 'InstanceDown'
+    target_match:
+      severity: 'warning'
+    equal: ['instance']
+    
+  # データベースがダウンしている場合、接続数アラートを抑制
+  - source_match:
+      alertname: 'PostgreSQLDown'
+    target_match:
+      alertname: 'PostgreSQLHighConnections'
+    equal: ['instance']

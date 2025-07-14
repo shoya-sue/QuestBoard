@@ -1,0 +1,39 @@
+# Code Owners for QuestBoard
+
+# デフォルトのオーナー
+* @your-github-username
+
+# Backend
+/backend/ @your-github-username @backend-team
+/backend/src/models/ @your-github-username @database-team
+/backend/src/services/ @your-github-username @backend-team
+/backend/src/routes/ @your-github-username @api-team
+/backend/tests/ @your-github-username @qa-team
+
+# Frontend
+/frontend/ @your-github-username @frontend-team
+/frontend/src/components/ @your-github-username @ui-team
+/frontend/src/hooks/ @your-github-username @frontend-team
+/frontend/src/services/ @your-github-username @frontend-team
+/frontend/tests/ @your-github-username @qa-team
+
+# インフラストラクチャ
+/Dockerfile* @your-github-username @devops-team
+/docker-compose*.yml @your-github-username @devops-team
+/.github/ @your-github-username @devops-team
+/scripts/ @your-github-username @devops-team
+
+# ドキュメント
+/README.md @your-github-username
+/docs/ @your-github-username @documentation-team
+*.md @your-github-username @documentation-team
+
+# セキュリティ関連
+/backend/src/middleware/auth.js @your-github-username @security-team
+/backend/src/utils/encryption.js @your-github-username @security-team
+/.env* @your-github-username @security-team
+
+# 設定ファイル
+/backend/package.json @your-github-username @backend-team
+/frontend/package.json @your-github-username @frontend-team
+/backend/src/config/ @your-github-username @backend-team @devops-team

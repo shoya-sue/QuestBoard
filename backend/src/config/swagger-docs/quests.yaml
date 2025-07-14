@@ -1,0 +1,498 @@
+# Quests API ドキュメント
+
+paths:
+  /quests:
+    get:
+      tags: [Quests]
+      summary: クエスト一覧取得
+      description: 利用可能なクエストの一覧を取得します
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/DifficultyParam'
+        - $ref: '#/components/parameters/StatusParam'
+      responses:
+        200:
+          description: クエスト一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  quests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Quest'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags: [Quests]
+      summary: クエスト作成
+      description: 新しいクエストを作成します（管理者のみ）
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+                - reward
+                - difficulty
+              properties:
+                title:
+                  type: string
+                  maxLength: 100
+                  description: クエストタイトル
+                  example: "ドラゴン討伐"
+                description:
+                  type: string
+                  maxLength: 1000
+                  description: クエストの説明
+                  example: "邪悪なドラゴンを討伐してください"
+                reward:
+                  type: string
+                  description: 報酬
+                  example: "1000G + ドラゴンの鱗"
+                difficulty:
+                  type: string
+                  enum: ['E', 'D', 'C', 'B', 'A', 'S', 'SS']
+                  description: 難易度
+                  example: "S"
+                category:
+                  type: string
+                  description: カテゴリ
+                  example: "討伐"
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: タグ
+                  example: ["ドラゴン", "高難易度"]
+                maxParticipants:
+                  type: integer
+                  minimum: 1
+                  description: 最大参加者数
+                  example: 4
+                deadline:
+                  type: string
+                  format: date-time
+                  description: 締切日時
+                  example: "2024-12-31T23:59:59Z"
+                imageUrl:
+                  type: string
+                  format: url
+                  description: クエスト画像URL
+      responses:
+        201:
+          description: クエスト作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quest'
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /quests/{id}:
+    get:
+      tags: [Quests]
+      summary: クエスト詳細取得
+      description: 指定されたIDのクエスト詳細を取得します
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: クエストID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: クエスト詳細取得成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quest'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    
+    put:
+      tags: [Quests]
+      summary: クエスト更新
+      description: クエスト情報を更新します（作成者または管理者のみ）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: クエストID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 100
+                  description: クエストタイトル
+                description:
+                  type: string
+                  maxLength: 1000
+                  description: クエストの説明
+                reward:
+                  type: string
+                  description: 報酬
+                difficulty:
+                  type: string
+                  enum: ['E', 'D', 'C', 'B', 'A', 'S', 'SS']
+                  description: 難易度
+                category:
+                  type: string
+                  description: カテゴリ
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: タグ
+                maxParticipants:
+                  type: integer
+                  minimum: 1
+                  description: 最大参加者数
+                deadline:
+                  type: string
+                  format: date-time
+                  description: 締切日時
+                imageUrl:
+                  type: string
+                  format: url
+                  description: クエスト画像URL
+      responses:
+        200:
+          description: クエスト更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quest'
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      tags: [Quests]
+      summary: クエスト削除
+      description: クエストを削除します（作成者または管理者のみ）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: クエストID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: クエスト削除成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "クエストが削除されました"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /quests/{id}/accept:
+    post:
+      tags: [Quests]
+      summary: クエスト受注
+      description: クエストを受注します
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: クエストID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: クエスト受注成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quest'
+        400:
+          description: 受注できないクエスト
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "このクエストは受注できません"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /quests/{id}/complete:
+    post:
+      tags: [Quests]
+      summary: クエスト完了
+      description: 受注中のクエストを完了します
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: クエストID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: クエスト完了成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quest'
+        400:
+          description: 完了できないクエスト
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "このクエストは完了できません"
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /quests/{id}/ratings:
+    get:
+      tags: [Quests]
+      summary: クエスト評価一覧取得
+      description: クエストの評価一覧を取得します
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: クエストID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: 評価一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: 評価ID
+                    userId:
+                      type: string
+                      format: uuid
+                      description: 評価者ID
+                    rating:
+                      type: integer
+                      minimum: 1
+                      maximum: 5
+                      description: 評価（1-5）
+                    comment:
+                      type: string
+                      description: コメント
+                    createdAt:
+                      type: string
+                      format: date-time
+                      description: 評価日時
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags: [Quests]
+      summary: クエスト評価投稿
+      description: 完了したクエストに評価を投稿します
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: クエストID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - rating
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  description: 評価（1-5）
+                  example: 5
+                comment:
+                  type: string
+                  maxLength: 500
+                  description: コメント
+                  example: "とても良いクエストでした！"
+      responses:
+        201:
+          description: 評価投稿成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "評価を投稿しました"
+                  rating:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      rating:
+                        type: integer
+                      comment:
+                        type: string
+        400:
+          $ref: '#/components/responses/ValidationError'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /quests/history:
+    get:
+      tags: [Quests]
+      summary: クエスト履歴取得
+      description: ユーザーのクエスト履歴を取得します
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: action
+          in: query
+          description: アクションフィルター
+          required: false
+          schema:
+            type: string
+            enum: ['created', 'accepted', 'completed', 'updated', 'deleted']
+      responses:
+        200:
+          description: クエスト履歴取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  history:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuestHistory'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /quests/completed:
+    get:
+      tags: [Quests]
+      summary: 完了クエスト一覧取得
+      description: 完了したクエストの一覧を取得します
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: userId
+          in: query
+          description: ユーザーIDでフィルター（指定した場合はそのユーザーが完了したクエストのみ）
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: 完了クエスト一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  quests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Quest'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        500:
+          $ref: '#/components/responses/InternalServerError'

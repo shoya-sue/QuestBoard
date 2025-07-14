@@ -7,6 +7,55 @@ const { DEV_MODE, devGoogleAuth } = require('../utils/devAuth');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+/**
+ * @swagger
+ * /auth/google:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Google OAuth認証
+ *     description: Google OAuth 2.0を使用してユーザー認証を行います
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - credential
+ *             properties:
+ *               credential:
+ *                 type: string
+ *                 description: GoogleのIDトークン
+ *                 example: "eyJhbGciOiJSUzI1NiIsImtpZCI6..."
+ *     responses:
+ *       200:
+ *         description: 認証成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *                 token:
+ *                   type: string
+ *                   description: JWTトークン
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         description: 認証失敗
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               error: "Google認証に失敗しました"
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+
 router.post('/google', async (req, res) => {
   try {
     const { credential } = req.body;

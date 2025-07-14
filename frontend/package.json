@@ -29,7 +29,12 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "analyze": "npm run build && npx serve -s build",
+    "bundle-analyzer": "npm run build && npx webpack-bundle-analyzer build/static/js/*.js",
+    "source-map-explorer": "npm run build && npx source-map-explorer 'build/static/js/*.js'",
+    "lighthouse": "npx lighthouse http://localhost:3000 --output=html --output-path=./lighthouse-report.html",
+    "performance-test": "npm run build && npm run lighthouse"
   },
   "eslintConfig": {
     "extends": [

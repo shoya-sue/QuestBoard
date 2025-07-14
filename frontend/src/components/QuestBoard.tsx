@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import QuestCard from './QuestCard';
-import QuestDetail from './QuestDetail';
-import GoogleLogin from './GoogleLogin';
-import AdminPanel from './AdminPanel';
 import QuestFilter, { FilterOptions } from './QuestFilter';
 import Pagination from './Pagination';
 import Notification from './Notification';
-import QuestHistory from './QuestHistory';
 import SearchBar from './SearchBar';
-import NotificationCenter from './NotificationCenter';
 import ThemeToggle from './ThemeToggle';
-import UserProfile from './UserProfile';
+
+// Lazy loaded components for better performance
+const QuestDetail = lazy(() => import('./QuestDetail'));
+const GoogleLogin = lazy(() => import('./GoogleLogin'));
+const AdminPanel = lazy(() => import('./AdminPanel'));
+const QuestHistory = lazy(() => import('./QuestHistory'));
+const NotificationCenter = lazy(() => import('./NotificationCenter'));
+const UserProfile = lazy(() => import('./UserProfile'));
 import { getQuests, acceptQuest, completeQuest, Pagination as PaginationType } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import socketService from '../services/socket';
