@@ -64,7 +64,7 @@ jobs:
           fi
 
       - name: Upload audit reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: npm-audit-reports
@@ -209,7 +209,7 @@ jobs:
           license-checker --production --onlyAllow 'MIT;ISC;BSD-2-Clause;BSD-3-Clause;Apache-2.0;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Unlicense' > ../frontend-licenses.txt || true
 
       - name: Upload license reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: license-reports
           path: |
@@ -236,7 +236,7 @@ jobs:
           echo "- SAST Scan: ${{ needs.sast-scan.result }}" >> security-report.md
 
       - name: Upload security report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: security-report
           path: security-report.md
