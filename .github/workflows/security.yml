@@ -1,13 +1,7 @@
 name: Security Scanning
 
 on:
-  schedule:
-    # 毎日午前2時に実行
-    - cron: '0 2 * * *'
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
