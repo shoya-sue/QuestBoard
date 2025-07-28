@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-const logger = require('../utils/logger');
+const { Logger: logger } = require('../utils/logger');
 
 class EnvironmentConfig {
   constructor() {

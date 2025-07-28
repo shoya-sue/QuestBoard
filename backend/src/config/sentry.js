@@ -54,8 +54,7 @@ const initSentry = (app) => {
     });
 
     // Expressエラーハンドラー
-    app.use(Sentry.Handlers.requestHandler());
-    app.use(Sentry.Handlers.tracingHandler());
+    // Note: These handlers are added in app.js after middleware setup
 
     return Sentry;
   }

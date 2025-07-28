@@ -7,7 +7,8 @@ module.exports = {
     database: process.env.DB_NAME || 'questboard_dev',
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
-    dialect: 'postgres',
+    dialect: process.env.USE_SQLITE === 'true' ? 'sqlite' : 'postgres',
+    storage: process.env.USE_SQLITE === 'true' ? './database.sqlite' : undefined,
     logging: console.log,
     define: {
       timestamps: true,
