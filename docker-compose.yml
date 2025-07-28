@@ -81,11 +81,19 @@ services:
       elasticsearch:
         condition: service_healthy
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV:-development}
       PORT: 3001
+      FRONTEND_URL: http://localhost:3000
       JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
+      REFRESH_TOKEN_EXPIRES_IN: ${REFRESH_TOKEN_EXPIRES_IN:-7d}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       ADMIN_EMAILS: ${ADMIN_EMAILS}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SESSION_NAME: ${SESSION_NAME:-questboard_session}
+      SESSION_MAX_AGE: ${SESSION_MAX_AGE:-86400000}
       # Database
       DB_HOST: postgres
       DB_PORT: 5432
@@ -98,14 +106,21 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
       # Elasticsearch
       ELASTICSEARCH_NODE: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME:-elastic}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
       # Email
+      EMAIL_ENABLED: ${EMAIL_ENABLED:-false}
+      DEV_MODE: ${DEV_MODE:-true}
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_SECURE: ${EMAIL_SECURE:-false}
       EMAIL_USER: ${EMAIL_USER}
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
       EMAIL_FROM: ${EMAIL_FROM}
       # Sentry
       SENTRY_DSN: ${SENTRY_DSN}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-development}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-1.0}
     volumes:
       - backend_logs:/app/logs
       - quest_data:/app/data/quests

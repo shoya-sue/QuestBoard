@@ -2,7 +2,7 @@
 FROM node:18-alpine AS base
 
 # 必要なシステムパッケージをインストール
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat netcat-openbsd
 
 WORKDIR /app
 
@@ -34,6 +34,10 @@ COPY --from=builder /app/src ./src
 COPY --from=builder /app/data ./data
 COPY --from=deps /app/node_modules ./node_modules
 COPY backend/package*.json ./
+COPY backend/.sequelizerc ./
+COPY backend/start.sh ./
+COPY backend/simple-start.sh ./
+COPY .env* ./
 
 # ログディレクトリの作成と権限設定
 RUN mkdir -p logs && chown -R nodejs:nodejs /app
@@ -46,4 +50,4 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3001/api/docs/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"
 
-CMD ["node", "src/app.js"]
+CMD ["./simple-start.sh"]

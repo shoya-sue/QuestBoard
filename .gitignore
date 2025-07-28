@@ -196,3 +196,8 @@ web_modules/
 *.log.gz
 *.zip
 *.tar.gz
+# 一時的なレポート
+docs/reports/temp/
+*.draft.md
+*.wip.md
+
