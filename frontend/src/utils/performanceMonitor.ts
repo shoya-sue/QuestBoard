@@ -76,32 +76,32 @@ class PerformanceMonitor {
   // Web Vitals 監視の設定
   private setupWebVitalsMonitoring(): void {
     // 動的にweb-vitalsライブラリを読み込み
-    import('web-vitals').then(({ onCLS, onFID, onFCP, onLCP, onTTFB }) => {
-      onCLS((metric) => {
+    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+      getCLS((metric: any) => {
         const rating = metric.value <= 0.1 ? 'good' : metric.value <= 0.25 ? 'needs-improvement' : 'poor';
         this.addMetric('CLS', metric.value, rating);
         this.reportWebVital(metric);
       });
 
-      onFID((metric) => {
+      getFID((metric: any) => {
         const rating = metric.value <= 100 ? 'good' : metric.value <= 300 ? 'needs-improvement' : 'poor';
         this.addMetric('FID', metric.value, rating);
         this.reportWebVital(metric);
       });
 
-      onFCP((metric) => {
+      getFCP((metric: any) => {
         const rating = metric.value <= 1800 ? 'good' : metric.value <= 3000 ? 'needs-improvement' : 'poor';
         this.addMetric('FCP', metric.value, rating);
         this.reportWebVital(metric);
       });
 
-      onLCP((metric) => {
+      getLCP((metric: any) => {
         const rating = metric.value <= 2500 ? 'good' : metric.value <= 4000 ? 'needs-improvement' : 'poor';
         this.addMetric('LCP', metric.value, rating);
         this.reportWebVital(metric);
       });
 
-      onTTFB((metric) => {
+      getTTFB((metric: any) => {
         const rating = metric.value <= 800 ? 'good' : metric.value <= 1800 ? 'needs-improvement' : 'poor';
         this.addMetric('TTFB', metric.value, rating);
         this.reportWebVital(metric);
@@ -211,8 +211,8 @@ class PerformanceMonitor {
       console.log(`Web Vital - ${metric.name}:`, metric.value, `(${metric.rating})`);
       
       // Google Analytics や他の分析サービスに送信
-      if (typeof gtag !== 'undefined') {
-        gtag('event', metric.name, {
+      if (typeof (window as any).gtag !== 'undefined') {
+        (window as any).gtag('event', metric.name, {
           event_category: 'Web Vitals',
           event_label: metric.id,
           value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),

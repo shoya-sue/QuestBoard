@@ -5,6 +5,10 @@ import Pagination from './Pagination';
 import Notification from './Notification';
 import SearchBar from './SearchBar';
 import ThemeToggle from './ThemeToggle';
+import { getQuests, acceptQuest, completeQuest, Pagination as PaginationType } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import socketService from '../services/socket';
+import './QuestBoard.css';
 
 // Lazy loaded components for better performance
 const QuestDetail = lazy(() => import('./QuestDetail'));
@@ -13,10 +17,6 @@ const AdminPanel = lazy(() => import('./AdminPanel'));
 const QuestHistory = lazy(() => import('./QuestHistory'));
 const NotificationCenter = lazy(() => import('./NotificationCenter'));
 const UserProfile = lazy(() => import('./UserProfile'));
-import { getQuests, acceptQuest, completeQuest, Pagination as PaginationType } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import socketService from '../services/socket';
-import './QuestBoard.css';
 
 interface Quest {
   id: string;

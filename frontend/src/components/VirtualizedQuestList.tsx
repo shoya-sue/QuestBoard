@@ -26,7 +26,7 @@ interface VirtualizedQuestListProps {
 
 // メモ化されたQuestCardアイテム
 const QuestCardItem = memo(({ index, style, data }: ListChildComponentProps) => {
-  const { quests, onQuestClick, onAcceptQuest, onCompleteQuest, userRole, userId } = data;
+  const { quests, onQuestClick, selectedQuestId } = data;
   const quest = quests[index];
 
   return (
@@ -35,10 +35,7 @@ const QuestCardItem = memo(({ index, style, data }: ListChildComponentProps) => 
         <QuestCard
           quest={quest}
           onClick={() => onQuestClick(quest)}
-          onAccept={() => onAcceptQuest(quest.id)}
-          onComplete={() => onCompleteQuest(quest.id)}
-          userRole={userRole}
-          userId={userId}
+          selected={quest.id === selectedQuestId}
         />
       </div>
     </div>
@@ -66,11 +63,8 @@ const VirtualizedQuestList: React.FC<VirtualizedQuestListProps> = ({
   const itemData = useMemo(() => ({
     quests,
     onQuestClick,
-    onAcceptQuest,
-    onCompleteQuest,
-    userRole,
-    userId
-  }), [quests, onQuestClick, onAcceptQuest, onCompleteQuest, userRole, userId]);
+    selectedQuestId: null
+  }), [quests, onQuestClick]);
 
   // アイテムの高さ（固定）
   const ITEM_HEIGHT = 200;
@@ -92,6 +86,7 @@ const VirtualizedQuestList: React.FC<VirtualizedQuestListProps> = ({
     <div ref={containerRef as React.RefObject<HTMLDivElement>}>
       <List
         height={height}
+        width="100%"
         itemCount={quests.length}
         itemSize={ITEM_HEIGHT}
         itemData={itemData}

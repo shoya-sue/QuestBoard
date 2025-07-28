@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 
 // パフォーマンス測定用カスタムフック
 export const usePerformanceMonitor = (componentName: string) => {
@@ -43,10 +43,10 @@ export const usePerformanceMonitor = (componentName: string) => {
 };
 
 // デバウンス用カスタムフック
-export const useDebounce = <T>(value: T, delay: number): T => {
-  const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
+export function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
@@ -57,13 +57,13 @@ export const useDebounce = <T>(value: T, delay: number): T => {
   }, [value, delay]);
 
   return debouncedValue;
-};
+}
 
 // スロットル用カスタムフック
-export const useThrottle = <T extends (...args: any[]) => any>(
+export function useThrottle<T extends (...args: any[]) => any>(
   callback: T,
   delay: number
-): T => {
+): T {
   const lastCall = useRef<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -90,7 +90,7 @@ export const useThrottle = <T extends (...args: any[]) => any>(
 export const useIntersectionObserver = (
   options: IntersectionObserverInit = {}
 ) => {
-  const [isIntersecting, setIsIntersecting] = React.useState(false);
+  const [isIntersecting, setIsIntersecting] = useState(false);
   const targetRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -146,25 +146,25 @@ export const useWebVitals = () => {
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') {
       // Web Vitals の測定
-      import('web-vitals').then(({ onLCP, onFID, onCLS, onFCP, onTTFB }) => {
-        onLCP((metric) => {
+      import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+        getLCP((metric) => {
           console.log('LCP (Largest Contentful Paint):', metric);
           // 本番環境では分析サービスに送信
         });
         
-        onFID((metric) => {
+        getFID((metric) => {
           console.log('FID (First Input Delay):', metric);
         });
         
-        onCLS((metric) => {
+        getCLS((metric) => {
           console.log('CLS (Cumulative Layout Shift):', metric);
         });
         
-        onFCP((metric) => {
+        getFCP((metric) => {
           console.log('FCP (First Contentful Paint):', metric);
         });
         
-        onTTFB((metric) => {
+        getTTFB((metric) => {
           console.log('TTFB (Time to First Byte):', metric);
         });
       });
@@ -175,11 +175,8 @@ export const useWebVitals = () => {
 // バンドルサイズ分析用ユーティリティ
 export const analyzeBundleSize = () => {
   if (process.env.NODE_ENV === 'development') {
-    import('webpack-bundle-analyzer').then(({ BundleAnalyzerPlugin }) => {
-      console.log('Bundle analysis available. Run npm run analyze to view bundle size.');
-    }).catch(() => {
-      console.log('Webpack bundle analyzer not available in this environment.');
-    });
+    // webpack-bundle-analyzer は開発環境でのみ使用
+    console.log('Bundle analysis available. Run npm run analyze to view bundle size.');
   }
 };
 
