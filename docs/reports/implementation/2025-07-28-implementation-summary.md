@@ -1,8 +1,16 @@
+---
+title: Quest Board - 実装完了サマリー
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [reports, implementation, summary, features, completion]
+---
+
 # Quest Board - 実装完了サマリー
 
 ## 🎯 実装完了機能
 
-### 基本機能（README.md記載）
+### 基本機能（readme.md記載）
 ✅ **クエスト管理システム**
 - クエスト一覧表示
 - クエスト詳細表示
@@ -165,7 +173,7 @@ QuestBoard/
 
 ## 📝 ドキュメント
 
-- ✅ README.md（プロジェクト概要）
+- ✅ readme.md（プロジェクト概要）
 - ✅ API仕様書
 - ✅ 環境変数説明
 - ✅ デプロイ手順

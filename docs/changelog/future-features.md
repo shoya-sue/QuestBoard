@@ -1,3 +1,11 @@
+---
+title: 今後の実装可能な機能
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [roadmap, future-features, enhancement, planning]
+---
+
 # 🚀 今後の実装可能な機能
 
 ## 📊 分析・統計機能

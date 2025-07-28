@@ -1,3 +1,11 @@
+---
+title: メール通知システムセットアップガイド
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [guides, notifications, email, setup, real-time]
+---
+
 # メール通知システムセットアップガイド
 
 ## 概要

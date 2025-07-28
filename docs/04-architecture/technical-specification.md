@@ -1,3 +1,11 @@
+---
+title: QuestBoard 技術仕様書
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [architecture, technical-specification, system-design, microservices]
+---
+
 # 🏗️ QuestBoard 技術仕様書
 
 ## 📋 概要
@@ -890,7 +898,7 @@ kubectl top pods
 
 ### 参考資料
 1. [セキュリティチェックリスト](../security/security-checklist.md)
-2. [バックアップガイド](../docs/BACKUP_GUIDE.md)
+2. [バックアップガイド](../docs/backup-guide.md)
 3. [API仕様書](http://localhost:3001/api/docs)
 4. [Grafana ダッシュボード](http://localhost:3001)
 

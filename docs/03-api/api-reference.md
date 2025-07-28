@@ -1,3 +1,11 @@
+---
+title: API リファレンス
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [api, reference, rest-api, endpoints, documentation]
+---
+
 # 📡 API リファレンス
 
 Quest Board REST API の完全な仕様書です。

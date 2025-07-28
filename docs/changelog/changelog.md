@@ -1,3 +1,11 @@
+---
+title: QuestBoard 変更履歴
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [changelog, version-history, releases, features]
+---
+
 # 📝 QuestBoard 変更履歴
 
 ## 概要

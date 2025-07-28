@@ -1,0 +1,115 @@
+{
+  "cross_references": {
+    "getting-started": {
+      "quick-start": {
+        "references": [
+          "02-guides/developer-guide.md",
+          "01-getting-started/setup-local.md"
+        ],
+        "prerequisites": [],
+        "next_steps": [
+          "01-getting-started/setup-local.md",
+          "02-guides/developer-guide.md"
+        ]
+      },
+      "setup-local": {
+        "references": [
+          "02-guides/google-oauth-setup.md",
+          "02-guides/search-setup.md",
+          "04-architecture/technical-specification.md"
+        ],
+        "prerequisites": [
+          "01-getting-started/quick-start.md"
+        ],
+        "next_steps": [
+          "02-guides/developer-guide.md"
+        ]
+      }
+    },
+    "guides": {
+      "developer-guide": {
+        "references": [
+          "04-architecture/technical-specification.md",
+          "03-api/api-reference.md",
+          "06-development/documentation-best-practices.md"
+        ],
+        "prerequisites": [
+          "01-getting-started/setup-local.md"
+        ],
+        "next_steps": [
+          "02-guides/deployment-guide.md",
+          "03-api/api-reference.md"
+        ]
+      },
+      "deployment-guide": {
+        "references": [
+          "05-operations/monitoring.md",
+          "02-guides/backup-guide.md"
+        ],
+        "prerequisites": [
+          "02-guides/developer-guide.md"
+        ],
+        "next_steps": [
+          "05-operations/monitoring.md"
+        ]
+      }
+    },
+    "api": {
+      "api-reference": {
+        "references": [
+          "02-guides/google-oauth-setup.md",
+          "04-architecture/technical-specification.md"
+        ],
+        "prerequisites": [
+          "02-guides/developer-guide.md"
+        ],
+        "next_steps": []
+      }
+    }
+  },
+  "learning_paths": {
+    "beginner": [
+      "01-getting-started/quick-start.md",
+      "01-getting-started/setup-local.md",
+      "02-guides/developer-guide.md"
+    ],
+    "developer": [
+      "02-guides/developer-guide.md",
+      "04-architecture/technical-specification.md",
+      "03-api/api-reference.md",
+      "06-development/documentation-best-practices.md"
+    ],
+    "operations": [
+      "02-guides/deployment-guide.md",
+      "05-operations/monitoring.md",
+      "02-guides/backup-guide.md"
+    ]
+  },
+  "tag_hierarchy": {
+    "getting-started": {
+      "weight": 10,
+      "description": "初心者向けの導入コンテンツ",
+      "related": ["installation", "quickstart", "setup"]
+    },
+    "guides": {
+      "weight": 8,
+      "description": "実践的なガイドとチュートリアル",
+      "related": ["development", "deployment", "configuration"]
+    },
+    "api": {
+      "weight": 7,
+      "description": "API仕様とリファレンス",
+      "related": ["reference", "endpoints", "authentication"]
+    },
+    "architecture": {
+      "weight": 6,
+      "description": "システム設計とアーキテクチャ",
+      "related": ["design", "technical", "infrastructure"]
+    },
+    "operations": {
+      "weight": 5,
+      "description": "運用と監視",
+      "related": ["monitoring", "deployment", "maintenance"]
+    }
+  }
+}

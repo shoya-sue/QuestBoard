@@ -1,3 +1,11 @@
+---
+title: クイックスタートガイド
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [getting-started, quickstart, installation]
+---
+
 # 🚀 クイックスタートガイド
 
 Quest Boardを**5分で起動**するためのガイドです。
@@ -136,8 +144,8 @@ npm install
 ## 📚 次のステップ
 
 - 📖 [使い方ガイド](./USER_GUIDE.md) - 基本的な使い方
-- 🛠️ [開発者ガイド](./DEVELOPER_GUIDE.md) - カスタマイズ方法
-- 📡 [API仕様書](./API_REFERENCE.md) - API詳細
+- 🛠️ [開発者ガイド](./developer-guide.md) - カスタマイズ方法
+- 📡 [API仕様書](./api-reference.md) - API詳細
 
 ---
 

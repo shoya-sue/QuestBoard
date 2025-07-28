@@ -1,3 +1,11 @@
+---
+title: ローカル開発環境セットアップガイド
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [getting-started, development, setup]
+---
+
 # ローカル開発環境セットアップガイド
 
 ## 前提条件

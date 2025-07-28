@@ -1,3 +1,11 @@
+---
+title: Quest Board Project Verification Report
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [verification, typescript, dependencies, security, bug-report]
+---
+
 # Quest Board Project Verification Report
 
 ## Executive Summary

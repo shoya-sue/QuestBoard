@@ -1,3 +1,11 @@
+---
+title: Elasticsearch検索機能セットアップガイド
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [guides, elasticsearch, search, setup, full-text-search]
+---
+
 # Elasticsearch検索機能セットアップガイド
 
 ## 概要

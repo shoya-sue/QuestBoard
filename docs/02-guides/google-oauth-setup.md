@@ -1,3 +1,11 @@
+---
+title: Google OAuth 設定ガイド
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [guides, oauth, google, authentication, setup]
+---
+
 # Google OAuth 設定ガイド
 
 ## 開発環境用設定

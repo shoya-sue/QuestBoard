@@ -1,3 +1,11 @@
+---
+title: Quest Board バックアップガイド
+version: 1.0.0
+lastUpdated: 2025-07-28
+author: 開発チーム
+tags: [guides, backup, data-safety, disaster-recovery, operations]
+---
+
 # Quest Board バックアップガイド
 
 ## 概要
@@ -261,6 +269,6 @@ Prometheusで以下のメトリクスを監視:
 
 ## 関連ドキュメント
 
-- [セキュリティガイド](./SECURITY.md)
+- [セキュリティガイド](./security.md)
 - [監視ガイド](./MONITORING.md)
 - [運用ガイド](./OPERATIONS.md)
