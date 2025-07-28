@@ -3,15 +3,23 @@ const { Quest, User } = require('../models');
 
 class SearchService {
   constructor() {
-    this.client = getClient();
+    this.client = null;
+  }
+
+  getSearchClient() {
+    if (!this.client) {
+      this.client = getClient();
+    }
+    return this.client;
   }
 
   // クエストをElasticsearchにインデックス
   async indexQuest(quest) {
-    if (!this.client) return;
+    const client = this.getSearchClient();
+    if (!client) return;
 
     try {
-      await this.client.index({
+      await client.index({
         index: 'quests',
         id: quest.id,
         body: {
@@ -35,57 +43,32 @@ class SearchService {
     }
   }
 
-  // ユーザーをElasticsearchにインデックス
-  async indexUser(user) {
-    if (!this.client) return;
-
-    try {
-      await this.client.index({
-        index: 'users',
-        id: user.id,
-        body: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          level: user.level || 1,
-          experience: user.experience || 0,
-          points: user.points || 0,
-          completedQuests: user.completedQuests || 0,
-          createdAt: user.createdAt
-        }
-      });
-    } catch (error) {
-      console.error('Error indexing user:', error);
-    }
-  }
-
-  // クエストの検索
+  // クエスト検索
   async searchQuests(query, options = {}) {
+    const client = this.getSearchClient();
+    if (!client) {
+      // Elasticsearchが利用できない場合は、データベースから検索
+      return this.searchQuestsFromDB(query, options);
+    }
+
     const {
       page = 1,
       limit = 20,
       category,
       difficulty,
-      status,
+      status = 'available',
       sortBy = 'relevance'
     } = options;
 
-    // Elasticsearchが利用できない場合はデータベースから検索
-    if (!this.client) {
-      return this.searchQuestsFromDB(query, options);
-    }
-
     try {
-      const from = (page - 1) * limit;
-      
-      // 検索クエリの構築
       const must = [];
       const filter = [];
 
+      // クエリ文字列での検索
       if (query) {
         must.push({
           multi_match: {
-            query: query,
+            query,
             fields: ['title^2', 'description', 'tags'],
             type: 'best_fields',
             fuzziness: 'AUTO'
@@ -93,191 +76,138 @@ class SearchService {
         });
       }
 
-      if (category) {
-        filter.push({ term: { category } });
-      }
+      // フィルター条件
+      if (category) filter.push({ term: { category } });
+      if (difficulty) filter.push({ term: { difficulty } });
+      if (status) filter.push({ term: { status } });
 
-      if (difficulty) {
-        filter.push({ term: { difficulty } });
-      }
-
-      if (status) {
-        filter.push({ term: { status } });
-      }
-
-      // ソート設定
-      let sort = [];
-      switch (sortBy) {
-        case 'newest':
-          sort = [{ createdAt: { order: 'desc' } }];
-          break;
-        case 'reward':
-          sort = [{ reward: { order: 'desc' } }];
-          break;
-        case 'difficulty':
-          sort = [{ difficulty: { order: 'asc' } }];
-          break;
-        default:
-          sort = ['_score'];
-      }
-
-      const searchBody = {
-        query: {
-          bool: {
-            must: must.length > 0 ? must : [{ match_all: {} }],
-            filter
-          }
-        },
-        sort,
-        from,
-        size: limit,
-        highlight: {
-          fields: {
-            title: {},
-            description: {}
+      const response = await client.search({
+        index: 'quests',
+        body: {
+          query: {
+            bool: {
+              must,
+              filter
+            }
+          },
+          from: (page - 1) * limit,
+          size: limit,
+          sort: this.getSortOption(sortBy),
+          highlight: {
+            fields: {
+              title: {},
+              description: {}
+            }
           }
         }
-      };
-
-      const result = await this.client.search({
-        index: 'quests',
-        body: searchBody
       });
 
-      const hits = result.hits.hits;
-      const total = result.hits.total.value;
-
       return {
-        quests: hits.map(hit => ({
+        results: response.hits.hits.map(hit => ({
           ...hit._source,
           _score: hit._score,
           highlight: hit.highlight
         })),
-        total,
+        total: response.hits.total.value,
         page,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(response.hits.total.value / limit)
       };
     } catch (error) {
-      console.error('Elasticsearch search error:', error);
-      // フォールバック: データベースから検索
+      console.error('Elasticsearch error:', error);
       return this.searchQuestsFromDB(query, options);
     }
   }
 
-  // データベースからの検索（フォールバック）
+  // データベースからクエストを検索（フォールバック）
   async searchQuestsFromDB(query, options = {}) {
     const {
       page = 1,
       limit = 20,
       category,
       difficulty,
-      status
+      status = 'available'
     } = options;
 
-    const where = {};
-    
+    const where = { status };
+    if (category) where.category = category;
+    if (difficulty) where.difficulty = difficulty;
+
     if (query) {
+      const { Op } = require('sequelize');
       where[Op.or] = [
         { title: { [Op.iLike]: `%${query}%` } },
         { description: { [Op.iLike]: `%${query}%` } }
       ];
     }
 
-    if (category) where.category = category;
-    if (difficulty) where.difficulty = difficulty;
-    if (status) where.status = status;
-
-    const offset = (page - 1) * limit;
-
     const { count, rows } = await Quest.findAndCountAll({
       where,
       limit,
-      offset,
-      order: [['createdAt', 'DESC']],
-      include: [{
-        model: User,
-        as: 'creator',
-        attributes: ['id', 'username', 'email']
-      }]
+      offset: (page - 1) * limit,
+      order: [['createdAt', 'DESC']]
     });
 
     return {
-      quests: rows,
+      results: rows,
       total: count,
       page,
       totalPages: Math.ceil(count / limit)
     };
   }
 
-  // ユーザーの検索
+  // ユーザー検索
   async searchUsers(query, options = {}) {
-    const { page = 1, limit = 20 } = options;
-
-    if (!this.client) {
+    const client = this.getSearchClient();
+    if (!client) {
       return this.searchUsersFromDB(query, options);
     }
 
+    const { page = 1, limit = 20 } = options;
+
     try {
-      const from = (page - 1) * limit;
-
-      const searchBody = {
-        query: {
-          multi_match: {
-            query: query,
-            fields: ['username^2', 'email'],
-            type: 'best_fields',
-            fuzziness: 'AUTO'
-          }
-        },
-        from,
-        size: limit,
-        sort: [
-          { level: { order: 'desc' } },
-          { points: { order: 'desc' } }
-        ]
-      };
-
-      const result = await this.client.search({
+      const response = await client.search({
         index: 'users',
-        body: searchBody
+        body: {
+          query: {
+            multi_match: {
+              query,
+              fields: ['username^2', 'email'],
+              type: 'best_fields',
+              fuzziness: 'AUTO'
+            }
+          },
+          from: (page - 1) * limit,
+          size: limit
+        }
       });
 
-      const hits = result.hits.hits;
-      const total = result.hits.total.value;
-
       return {
-        users: hits.map(hit => hit._source),
-        total,
+        users: response.hits.hits.map(hit => hit._source),
+        total: response.hits.total.value,
         page,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(response.hits.total.value / limit)
       };
     } catch (error) {
-      console.error('Elasticsearch user search error:', error);
+      console.error('Elasticsearch error:', error);
       return this.searchUsersFromDB(query, options);
     }
   }
 
-  // データベースからのユーザー検索（フォールバック）
+  // データベースからユーザーを検索（フォールバック）
   async searchUsersFromDB(query, options = {}) {
     const { page = 1, limit = 20 } = options;
-
-    const where = {
-      [Op.or]: [
-        { username: { [Op.iLike]: `%${query}%` } },
-        { email: { [Op.iLike]: `%${query}%` } }
-      ]
-    };
-
-    const offset = (page - 1) * limit;
+    const { Op } = require('sequelize');
 
     const { count, rows } = await User.findAndCountAll({
-      where,
+      where: {
+        [Op.or]: [
+          { username: { [Op.iLike]: `%${query}%` } },
+          { email: { [Op.iLike]: `%${query}%` } }
+        ]
+      },
       limit,
-      offset,
-      order: [
-        ['level', 'DESC'],
-        ['points', 'DESC']
-      ],
+      offset: (page - 1) * limit,
+      order: [['createdAt', 'DESC']],
       attributes: { exclude: ['password'] }
     });
 
@@ -291,20 +221,21 @@ class SearchService {
 
   // サジェスト機能
   async getSuggestions(query, type = 'quest') {
-    if (!this.client) return [];
+    const client = this.getSearchClient();
+    if (!client) return [];
 
     try {
       const index = type === 'quest' ? 'quests' : 'users';
       const field = type === 'quest' ? 'title' : 'username';
 
-      const result = await this.client.search({
+      const response = await client.search({
         index,
         body: {
           suggest: {
-            suggestion: {
+            suggestions: {
               prefix: query,
               completion: {
-                field: `${field}.keyword`,
+                field: `${field}.suggest`,
                 size: 10
               }
             }
@@ -312,34 +243,20 @@ class SearchService {
         }
       });
 
-      return result.suggest.suggestion[0].options.map(option => option.text);
+      return response.suggest.suggestions[0].options.map(option => option.text);
     } catch (error) {
       console.error('Suggestion error:', error);
       return [];
     }
   }
 
-  // インデックスの更新
-  async updateQuestIndex(questId) {
-    const quest = await Quest.findByPk(questId);
-    if (quest) {
-      await this.indexQuest(quest);
-    }
-  }
-
-  async updateUserIndex(userId) {
-    const user = await User.findByPk(userId);
-    if (user) {
-      await this.indexUser(user);
-    }
-  }
-
-  // インデックスの削除
+  // クエストをインデックスから削除
   async deleteQuestFromIndex(questId) {
-    if (!this.client) return;
+    const client = this.getSearchClient();
+    if (!client) return;
 
     try {
-      await this.client.delete({
+      await client.delete({
         index: 'quests',
         id: questId
       });
@@ -348,27 +265,56 @@ class SearchService {
     }
   }
 
-  async deleteUserFromIndex(userId) {
-    if (!this.client) return;
+  // ユーザーをインデックスに追加
+  async indexUser(user) {
+    const client = this.getSearchClient();
+    if (!client) return;
 
     try {
-      await this.client.delete({
+      await client.index({
         index: 'users',
-        id: userId
+        id: user.id,
+        body: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          level: user.level,
+          experience: user.experience,
+          points: user.points,
+          completedQuests: user.completedQuests || 0,
+          createdAt: user.createdAt
+        }
       });
     } catch (error) {
-      console.error('Error deleting user from index:', error);
+      console.error('Error indexing user:', error);
     }
   }
 
-  // 全データの再インデックス
+  // ソートオプションの取得
+  getSortOption(sortBy) {
+    switch (sortBy) {
+      case 'newest':
+        return [{ createdAt: { order: 'desc' } }];
+      case 'oldest':
+        return [{ createdAt: { order: 'asc' } }];
+      case 'reward':
+        return [{ reward: { order: 'desc' } }];
+      case 'difficulty':
+        return [{ difficulty: { order: 'asc' } }];
+      default:
+        return ['_score'];
+    }
+  }
+
+  // インデックスの再構築
   async reindexAll() {
-    if (!this.client) {
-      console.log('Elasticsearch not available, skipping reindex');
+    const client = this.getSearchClient();
+    if (!client) {
+      console.log('Elasticsearch not available for reindexing');
       return;
     }
 
-    console.log('Starting reindex of all data...');
+    console.log('Starting reindex...');
 
     // クエストの再インデックス
     const quests = await Quest.findAll();
@@ -391,4 +337,4 @@ class SearchService {
 // Sequelizeの必要なオペレーターをインポート
 const { Op } = require('sequelize');
 
-module.exports = new SearchService();
+module.exports = SearchService;

@@ -1,4 +1,7 @@
 require('dotenv').config();
+console.log('Starting Quest Board backend server...');
+
+try {
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -23,7 +26,13 @@ const PORT = process.env.PORT || 3001;
 initializeMetrics();
 
 // Initialize Sentry
-initSentry(app);
+const sentryInstance = initSentry(app);
+
+// Sentry request handler (must be before other middleware)
+if (sentryInstance) {
+  app.use(sentryInstance.Handlers.requestHandler());
+  app.use(sentryInstance.Handlers.tracingHandler());
+}
 
 // セキュリティミドルウェア
 app.use(helmetConfig);
@@ -65,7 +74,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/2fa', require('./routes/twoFA'));
 app.use('/api/docs', docsRoutes);
-app.use('/api/admin', require('./routes/admin'));
+// app.use('/api/admin', require('./routes/admin')); // Temporarily disabled - missing AWS SDK
 
 app.use('/data/quests', express.static(path.join(__dirname, '../data/quests')));
 
@@ -106,8 +115,8 @@ app.get('/', (req, res) => {
 app.use(errorHandler);
 
 // Sentry error handler must be before any other error middleware and after all controllers
-if (Sentry) {
-  app.use(Sentry.Handlers.errorHandler());
+if (sentryInstance) {
+  app.use(sentryInstance.Handlers.errorHandler());
 }
 
 const server = app.listen(PORT, async () => {
@@ -149,3 +158,9 @@ socketEvents.setIO(io);
 
 // Export io for use in other modules
 module.exports = { app, io };
+
+} catch (error) {
+  console.error('Failed to start server:', error.message);
+  console.error('Stack trace:', error.stack);
+  process.exit(1);
+}

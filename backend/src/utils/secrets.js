@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const fs = require('fs').promises;
 const path = require('path');
-const logger = require('./logger');
+const { Logger: logger } = require('./logger');
 
 class SecretsManager {
   constructor() {

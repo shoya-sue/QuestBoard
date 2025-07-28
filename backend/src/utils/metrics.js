@@ -1,5 +1,5 @@
 const promClient = require('prom-client');
-const logger = require('./logger');
+const { Logger: logger } = require('./logger');
 
 // Prometheusレジストリの作成
 const register = new promClient.Registry();

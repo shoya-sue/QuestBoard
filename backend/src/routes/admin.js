@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken, isAdmin } = require('../middleware/auth');
 const backupService = require('../services/backupService');
-const logger = require('../utils/logger');
+const { Logger: logger } = require('../utils/logger');
 const { updateQuestMetrics } = require('../utils/metrics');
 const db = require('../models');
 

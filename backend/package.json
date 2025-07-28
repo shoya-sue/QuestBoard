@@ -4,8 +4,11 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "start": "node src/app.js",
+    "start": "node dist/app.js",
+    "start:dev": "node src/app.js",
     "dev": "nodemon src/app.js",
+    "build": "npm run clean && node build.js",
+    "clean": "rm -rf dist",
     "reindex": "node src/scripts/reindex.js",
     "migrate": "node src/migrations/migrate.js"
   },

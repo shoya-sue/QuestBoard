@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const searchService = require('../services/search');
-const { auth } = require('../middleware/auth');
+const SearchService = require('../services/search');
+const searchService = new SearchService();
+const { authenticate: auth } = require('../middleware/auth');
 
 // クエスト検索
 router.get('/quests', async (req, res) => {
