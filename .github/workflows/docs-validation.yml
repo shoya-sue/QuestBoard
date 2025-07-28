@@ -1,0 +1,66 @@
+name: Documentation Validation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '**.md'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - '**.md'
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Check Markdown links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          use-verbose-mode: 'yes'
+          config-file: '.github/workflows/markdown-link-config.json'
+          
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli
+        
+      - name: Lint Markdown files
+        run: markdownlint 'docs/**/*.md' '*.md' --config .markdownlint.json
+        
+      - name: Install cspell
+        run: npm install -g cspell
+        
+      - name: Spell check
+        run: cspell "docs/**/*.md" "*.md" --config .cspell.json
+        
+      - name: Validate frontmatter
+        run: |
+          # Check that all .md files in docs/ have frontmatter
+          find docs -name "*.md" -not -path "docs/reports/temp/*" -not -name "README.md" | while read file; do
+            if ! head -1 "$file" | grep -q "^---$"; then
+              echo "Missing frontmatter in: $file"
+              exit 1
+            fi
+          done
+          
+      - name: Check file naming convention
+        run: |
+          # Check that all files follow kebab-case naming
+          find docs -name "*.md" | while read file; do
+            filename=$(basename "$file" .md)
+            if [[ "$filename" != "README" ]] && ! echo "$filename" | grep -qE '^[a-z0-9-]+$|^[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+$'; then
+              echo "Invalid filename (should be kebab-case or date-prefixed): $file"
+              exit 1
+            fi
+          done

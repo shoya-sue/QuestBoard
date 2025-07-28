@@ -1,0 +1,293 @@
+name: Advanced Documentation Quality Assurance
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '**.md'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - '**.md'
+  schedule:
+    # 毎週月曜日の午前9時に実行
+    - cron: '0 9 * * 1'
+
+jobs:
+  advanced-quality-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: |
+          npm install -g markdownlint-cli cspell textlint alex
+          npm install js-yaml
+          
+      - name: Basic Markdown validation
+        run: markdownlint 'docs/**/*.md' '*.md' --config .markdownlint.json
+        
+      - name: Spell check with custom dictionary
+        run: cspell "docs/**/*.md" "*.md" --config .cspell.json
+        
+      - name: Check for inclusive language
+        run: |
+          # alexコマンドで包括的言語チェック
+          find docs -name "*.md" -exec alex {} \; || true
+          
+      - name: Validate frontmatter structure
+        run: |
+          node -e "
+          const fs = require('fs');
+          const yaml = require('js-yaml');
+          const path = require('path');
+          
+          const requiredFields = ['title', 'version', 'lastUpdated', 'author', 'tags'];
+          let errors = 0;
+          
+          function checkFile(filePath) {
+            const content = fs.readFileSync(filePath, 'utf8');
+            const match = content.match(/^---\\n([\\s\\S]*?)\\n---/);
+            
+            if (!match) {
+              console.log('❌ Missing frontmatter:', filePath);
+              return false;
+            }
+            
+            try {
+              const frontmatter = yaml.load(match[1]);
+              const missing = requiredFields.filter(field => !frontmatter[field]);
+              
+              if (missing.length > 0) {
+                console.log('❌ Missing fields in', filePath, ':', missing.join(', '));
+                return false;
+              }
+              
+              // タグの妥当性チェック
+              if (!Array.isArray(frontmatter.tags) || frontmatter.tags.length === 0) {
+                console.log('❌ Invalid tags in', filePath);
+                return false;
+              }
+              
+              // 日付形式チェック
+              if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(frontmatter.lastUpdated)) {
+                console.log('❌ Invalid date format in', filePath);
+                return false;
+              }
+              
+              return true;
+            } catch (e) {
+              console.log('❌ Invalid YAML in', filePath, ':', e.message);
+              return false;
+            }
+          }
+          
+          function scanDirectory(dir) {
+            const items = fs.readdirSync(dir);
+            items.forEach(item => {
+              const fullPath = path.join(dir, item);
+              if (fs.statSync(fullPath).isDirectory()) {
+                scanDirectory(fullPath);
+              } else if (item.endsWith('.md') && item !== 'README.md') {
+                if (!checkFile(fullPath)) errors++;
+              }
+            });
+          }
+          
+          scanDirectory('docs');
+          
+          if (errors > 0) {
+            console.log('\\n💥 Total errors:', errors);
+            process.exit(1);
+          } else {
+            console.log('✅ All frontmatter is valid');
+          }
+          "
+          
+      - name: Check document freshness
+        run: |
+          # 90日以上更新されていない重要ドキュメントを検出
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          const yaml = require('js-yaml');
+          
+          const STALE_DAYS = 90;
+          const IMPORTANT_PATHS = ['01-getting-started', '02-guides', '03-api'];
+          const now = new Date();
+          
+          function checkStaleness(dir, basePath = '') {
+            const items = fs.readdirSync(dir);
+            items.forEach(item => {
+              const fullPath = path.join(dir, item);
+              const relativePath = path.join(basePath, item);
+              
+              if (fs.statSync(fullPath).isDirectory()) {
+                checkStaleness(fullPath, relativePath);
+              } else if (item.endsWith('.md') && item !== 'README.md') {
+                const content = fs.readFileSync(fullPath, 'utf8');
+                const match = content.match(/^---\\n([\\s\\S]*?)\\n---/);
+                
+                if (match) {
+                  try {
+                    const frontmatter = yaml.load(match[1]);
+                    const lastUpdated = new Date(frontmatter.lastUpdated);
+                    const daysDiff = Math.floor((now - lastUpdated) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysDiff > STALE_DAYS) {
+                      const isImportant = IMPORTANT_PATHS.some(p => relativePath.startsWith(p));
+                      const marker = isImportant ? '🚨' : '⚠️';
+                      console.log(\`\${marker} Stale document (\${daysDiff} days): \${relativePath}\`);
+                    }
+                  } catch (e) {
+                    console.log('❌ Date parse error in', relativePath);
+                  }
+                }
+              }
+            });
+          }
+          
+          checkStaleness('docs');
+          "
+          
+      - name: Validate cross-references
+        run: |
+          # 相互参照の整合性チェック
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          
+          let brokenLinks = 0;
+          
+          function validateLinks(dir, basePath = '') {
+            const items = fs.readdirSync(dir);
+            items.forEach(item => {
+              const fullPath = path.join(dir, item);
+              const relativePath = path.join(basePath, item);
+              
+              if (fs.statSync(fullPath).isDirectory()) {
+                validateLinks(fullPath, relativePath);
+              } else if (item.endsWith('.md')) {
+                const content = fs.readFileSync(fullPath, 'utf8');
+                const linkRegex = /\\[([^\\]]+)\\]\\(([^)]+)\\)/g;
+                let match;
+                
+                while ((match = linkRegex.exec(content)) !== null) {
+                  const [, linkText, linkPath] = match;
+                  
+                  // 外部リンクはスキップ
+                  if (linkPath.startsWith('http')) continue;
+                  if (linkPath.startsWith('#')) continue; // アンカーリンク
+                  
+                  const resolvedPath = path.resolve(path.dirname(fullPath), linkPath);
+                  if (!fs.existsSync(resolvedPath)) {
+                    console.log(\`❌ Broken link in \${relativePath}: \${linkPath}\`);
+                    brokenLinks++;
+                  }
+                }
+              }
+            });
+          }
+          
+          validateLinks('docs');
+          
+          if (brokenLinks > 0) {
+            console.log(\`\\n💥 Total broken links: \${brokenLinks}\`);
+            process.exit(1);
+          } else {
+            console.log('✅ All internal links are valid');
+          }
+          "
+          
+      - name: Generate quality report
+        run: |
+          node -e "
+          const fs = require('fs');
+          const report = {
+            timestamp: new Date().toISOString(),
+            repository: process.env.GITHUB_REPOSITORY,
+            commit: process.env.GITHUB_SHA,
+            summary: 'Advanced documentation quality check completed',
+            nextActions: [
+              'Review any flagged issues',
+              'Update stale documents',
+              'Consider implementing Docusaurus for better user experience'
+            ]
+          };
+          
+          console.log('📊 Quality Report Generated');
+          console.log(JSON.stringify(report, null, 2));
+          "
+          
+      - name: Performance analysis
+        run: |
+          # ドキュメントサイズとreadability分析
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          
+          let totalSize = 0;
+          let totalWords = 0;
+          let docCount = 0;
+          
+          function analyzeDoc(filePath) {
+            const content = fs.readFileSync(filePath, 'utf8');
+            const size = content.length;
+            const wordCount = content.split(/\\s+/).length;
+            
+            totalSize += size;
+            totalWords += wordCount;
+            docCount++;
+            
+            // 大きすぎるドキュメントを警告
+            if (wordCount > 3000) {
+              console.log(\`⚠️ Large document (\${wordCount} words): \${filePath}\`);
+            }
+            
+            // 小さすぎるドキュメントを警告
+            if (wordCount < 100 && !filePath.includes('README')) {
+              console.log(\`⚠️ Small document (\${wordCount} words): \${filePath}\`);
+            }
+          }
+          
+          function scanDirectory(dir) {
+            const items = fs.readdirSync(dir);
+            items.forEach(item => {
+              const fullPath = path.join(dir, item);
+              if (fs.statSync(fullPath).isDirectory()) {
+                scanDirectory(fullPath);
+              } else if (item.endsWith('.md')) {
+                analyzeDoc(fullPath);
+              }
+            });
+          }
+          
+          scanDirectory('docs');
+          
+          console.log('\\n📊 Documentation Statistics:');
+          console.log(\`Total documents: \${docCount}\`);
+          console.log(\`Total size: \${Math.round(totalSize / 1024)}KB\`);
+          console.log(\`Total words: \${totalWords}\`);
+          console.log(\`Average words per document: \${Math.round(totalWords / docCount)}\`);
+          "
+          
+      - name: Security check
+        run: |
+          # セキュリティ情報の露出チェック
+          echo "🔍 Checking for sensitive information..."
+          
+          # APIキー、パスワード、秘密情報のパターンをチェック
+          if grep -r -i "password\|secret\|key\|token" docs/ --include="*.md" | grep -v "example\|placeholder\|YOUR_" | head -5; then
+            echo "⚠️ Potential sensitive information found in documentation"
+          else
+            echo "✅ No sensitive information detected"
+          fi
