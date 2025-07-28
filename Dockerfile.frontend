@@ -1,5 +1,5 @@
 # Node.js 公式イメージを使用
-FROM node:18-alpine AS base
+FROM node:24-alpine AS base
 
 # 必要なシステムパッケージをインストール
 RUN apk add --no-cache libc6-compat
