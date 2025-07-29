@@ -1,6 +1,7 @@
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const session = require('express-session');
+const csrf = require('csurf');
 
 // レート制限の設定
 const createRateLimiter = (windowMs, max, message) => {
@@ -64,10 +65,27 @@ const sessionConfig = session({
   name: 'qb.sid', // デフォルトの'connect.sid'から変更
 });
 
+// CSRF保護の設定
+const csrfProtection = csrf({
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  }
+});
+
+// CSRFトークンをレスポンスに含める
+const csrfToken = (req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+};
+
 module.exports = {
   generalLimiter,
   authLimiter,
   uploadLimiter,
   helmetConfig,
   sessionConfig,
+  csrfProtection,
+  csrfToken,
 };

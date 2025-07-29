@@ -64,8 +64,8 @@ router.post('/google', async (req, res) => {
       return res.status(400).json({ error: 'Google認証情報が必要です' });
     }
 
-    // 開発モードのチェック
-    if (DEV_MODE && (credential === 'dev-token' || credential === 'admin-token')) {
+    // 開発モードのチェック（ローカル環境のみ）
+    if (DEV_MODE && process.env.NODE_ENV !== 'production' && (credential === 'dev-token' || credential === 'admin-token')) {
       const { user, token } = await devGoogleAuth(credential);
       return res.json({ user, token });
     }

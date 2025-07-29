@@ -31,6 +31,12 @@ class BackupService {
    */
   async createBackup(type = 'full') {
     try {
+      // typeパラメータのバリデーション
+      const allowedTypes = ['full', 'incremental', 'differential'];
+      if (!allowedTypes.includes(type)) {
+        throw new Error('Invalid backup type');
+      }
+      
       logger.info(`Starting ${type} backup`);
       
       const { stdout, stderr } = await execAsync(`${this.backupScript} ${type}`);
@@ -85,7 +91,13 @@ class BackupService {
         throw new Error('Backup file not found');
       }
       
-      const { stdout, stderr } = await execAsync(`${this.backupScript} restore ${backupFile}`);
+      // ファイル名のサニタイズ
+      const sanitizedBackupFile = path.basename(backupFile);
+      if (sanitizedBackupFile !== backupFile) {
+        throw new Error('Invalid backup file path');
+      }
+      
+      const { stdout, stderr } = await execAsync(`${this.backupScript} restore "${sanitizedBackupFile}"`);
       
       if (stderr) {
         logger.error('Restore stderr:', stderr);
@@ -321,6 +333,10 @@ class BackupService {
       if (backupFile.startsWith('s3://')) {
         // S3ファイルの存在確認
         const key = backupFile.replace(`s3://${this.s3Bucket}/`, '');
+        // S3キーのバリデーション
+        if (key.includes('..') || key.startsWith('/')) {
+          throw new Error('Invalid S3 key');
+        }
         const command = new ListObjectsV2Command({
           Bucket: this.s3Bucket,
           Prefix: key,
@@ -332,7 +348,13 @@ class BackupService {
         
       } else {
         // ローカルファイルの存在確認
-        await fs.access(backupFile);
+        // パスのバリデーション
+        const normalizedPath = path.normalize(backupFile);
+        const resolvedPath = path.resolve(this.backupDir, normalizedPath);
+        if (!resolvedPath.startsWith(path.resolve(this.backupDir))) {
+          throw new Error('Invalid backup file path');
+        }
+        await fs.access(resolvedPath);
         return true;
       }
     } catch (error) {
