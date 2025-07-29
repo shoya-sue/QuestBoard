@@ -30,6 +30,16 @@ frontend/.env
 secrets/
 credentials/
 
+# Security testing tools (development only)
+security/penetration-test.js
+security/security-audit.js
+security/run-security-tests.sh
+security/*.log
+security/*.json
+# Keep the security checklist and headers
+!security/security-checklist.md
+!security/security-headers.js
+
 # Production
 build/
 dist/

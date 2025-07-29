@@ -1,0 +1,23 @@
+name: "CodeQL config"
+
+# Paths to exclude from the analysis
+paths-ignore:
+  - security/penetration-test.js
+  - security/security-audit.js
+  - security/run-security-tests.sh
+  - "**/*.test.js"
+  - "**/*.spec.js"
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+
+# Query filters
+query-filters:
+  - exclude:
+      problem.severity:
+        - note
+      tags contain:
+        - "testing"
+        - "development"
