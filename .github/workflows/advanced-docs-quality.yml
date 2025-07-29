@@ -1,19 +1,7 @@
 name: Advanced Documentation Quality Assurance
 
 on:
-  pull_request:
-    paths:
-      - 'docs/**'
-      - '**.md'
-  push:
-    branches:
-      - main
-    paths:
-      - 'docs/**'
-      - '**.md'
-  schedule:
-    # 毎週月曜日の午前9時に実行
-    - cron: '0 9 * * 1'
+  workflow_dispatch:
 
 jobs:
   advanced-quality-check:

@@ -1,16 +1,7 @@
 name: Documentation Validation
 
 on:
-  pull_request:
-    paths:
-      - 'docs/**'
-      - '**.md'
-  push:
-    branches:
-      - main
-    paths:
-      - 'docs/**'
-      - '**.md'
+  workflow_dispatch:
 
 jobs:
   validate-docs:
