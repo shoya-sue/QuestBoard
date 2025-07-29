@@ -21,7 +21,7 @@
     "@types/nodemailer": "^6.4.17",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
-    "csurf": "^1.11.0",
+    "csrf-csrf": "^4.0.3",
     "dotenv": "^17.2.0",
     "email-templates": "^12.0.3",
     "express": "^5.1.0",
@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "jest": "^30.0.5",
-    "nodemon": "^2.0.20",
+    "nodemon": "^3.1.10",
     "source-map-explorer": "^2.5.3",
     "sqlite3": "^5.1.7",
     "supertest": "^7.1.4",

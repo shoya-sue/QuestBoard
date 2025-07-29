@@ -1,7 +1,7 @@
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const session = require('express-session');
-const csrf = require('csurf');
+const { doubleCsrf } = require('csrf-csrf');
 
 // レート制限の設定
 const createRateLimiter = (windowMs, max, message) => {
@@ -65,20 +65,36 @@ const sessionConfig = session({
   name: 'qb.sid', // デフォルトの'connect.sid'から変更
 });
 
-// CSRF保護の設定
-const csrfProtection = csrf({
-  cookie: {
+// CSRF保護の設定（Double Submit Cookie Pattern）
+const {
+  invalidCsrfTokenError,
+  generateToken,
+  validateRequest,
+  doubleCsrfProtection
+} = doubleCsrf({
+  getSecret: () => process.env.CSRF_SECRET || process.env.JWT_SECRET,
+  cookieName: '__Host-psifi.x-csrf-token',
+  cookieOptions: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-  }
+    sameSite: 'strict',
+    path: '/'
+  },
+  size: 64,
+  ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
+  getTokenFromRequest: (req) => req.headers['x-csrf-token']
 });
 
-// CSRFトークンをレスポンスに含める
+// CSRFトークンを生成してレスポンスに含める
 const csrfToken = (req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
+  const token = generateToken(req, res);
+  res.locals.csrfToken = token;
+  res.setHeader('X-CSRF-Token', token);
   next();
 };
+
+// CSRF保護ミドルウェア
+const csrfProtection = doubleCsrfProtection;
 
 module.exports = {
   generalLimiter,
@@ -88,4 +104,6 @@ module.exports = {
   sessionConfig,
   csrfProtection,
   csrfToken,
+  generateToken,
+  validateRequest,
 };
