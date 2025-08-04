@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@react-oauth/google": "^0.12.2",
-    "@sentry/react": "^9.42.1",
+    "@sentry/react": "^10.0.0",
     "@sentry/tracing": "^7.120.3",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.4",
