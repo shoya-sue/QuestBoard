@@ -31,7 +31,6 @@ const sentryInstance = initSentry(app);
 // Sentry request handler (must be before other middleware)
 if (sentryInstance) {
   app.use(sentryInstance.Handlers.requestHandler());
-  app.use(sentryInstance.Handlers.tracingHandler());
 }
 
 // セキュリティミドルウェア

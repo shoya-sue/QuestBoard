@@ -1,12 +1,11 @@
 const Sentry = require('@sentry/node');
-const { CaptureConsole } = require('@sentry/integrations');
 
 const initSentry = (app) => {
   if (process.env.SENTRY_DSN) {
     Sentry.init({
       dsn: process.env.SENTRY_DSN,
       integrations: [
-        new CaptureConsole({
+        Sentry.integrations.captureConsole({
           levels: ['error', 'warn'],
         }),
       ],
