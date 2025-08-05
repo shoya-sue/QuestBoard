@@ -76,32 +76,32 @@ class PerformanceMonitor {
   // Web Vitals 監視の設定
   private setupWebVitalsMonitoring(): void {
     // 動的にweb-vitalsライブラリを読み込み
-    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-      getCLS((metric: any) => {
+    import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
+      onCLS((metric: any) => {
         const rating = metric.value <= 0.1 ? 'good' : metric.value <= 0.25 ? 'needs-improvement' : 'poor';
         this.addMetric('CLS', metric.value, rating);
         this.reportWebVital(metric);
       });
 
-      getFID((metric: any) => {
-        const rating = metric.value <= 100 ? 'good' : metric.value <= 300 ? 'needs-improvement' : 'poor';
-        this.addMetric('FID', metric.value, rating);
+      onINP((metric: any) => {
+        const rating = metric.value <= 200 ? 'good' : metric.value <= 500 ? 'needs-improvement' : 'poor';
+        this.addMetric('INP', metric.value, rating);
         this.reportWebVital(metric);
       });
 
-      getFCP((metric: any) => {
+      onFCP((metric: any) => {
         const rating = metric.value <= 1800 ? 'good' : metric.value <= 3000 ? 'needs-improvement' : 'poor';
         this.addMetric('FCP', metric.value, rating);
         this.reportWebVital(metric);
       });
 
-      getLCP((metric: any) => {
+      onLCP((metric: any) => {
         const rating = metric.value <= 2500 ? 'good' : metric.value <= 4000 ? 'needs-improvement' : 'poor';
         this.addMetric('LCP', metric.value, rating);
         this.reportWebVital(metric);
       });
 
-      getTTFB((metric: any) => {
+      onTTFB((metric: any) => {
         const rating = metric.value <= 800 ? 'good' : metric.value <= 1800 ? 'needs-improvement' : 'poor';
         this.addMetric('TTFB', metric.value, rating);
         this.reportWebVital(metric);
