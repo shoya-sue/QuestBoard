@@ -17,7 +17,6 @@
     "@react-oauth/google": "^0.12.2",
     "@sentry/integrations": "^7.114.0",
     "@sentry/node": "^9.42.1",
-    "@sentry/react": "^10.0.0",
     "@types/nodemailer": "^6.4.17",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
