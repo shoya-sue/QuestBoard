@@ -146,25 +146,25 @@ export const useWebVitals = () => {
   useEffect(() => {
     if (process.env.NODE_ENV === 'production') {
       // Web Vitals の測定
-      import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-        getLCP((metric) => {
+      import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
+        onLCP((metric) => {
           console.log('LCP (Largest Contentful Paint):', metric);
           // 本番環境では分析サービスに送信
         });
         
-        getFID((metric) => {
-          console.log('FID (First Input Delay):', metric);
+        onINP((metric) => {
+          console.log('INP (Interaction to Next Paint):', metric);
         });
         
-        getCLS((metric) => {
+        onCLS((metric) => {
           console.log('CLS (Cumulative Layout Shift):', metric);
         });
         
-        getFCP((metric) => {
+        onFCP((metric) => {
           console.log('FCP (First Contentful Paint):', metric);
         });
         
-        getTTFB((metric) => {
+        onTTFB((metric) => {
           console.log('TTFB (Time to First Byte):', metric);
         });
       });
