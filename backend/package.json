@@ -13,7 +13,7 @@
     "migrate": "node src/migrations/migrate.js"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^9.0.3",
+    "@elastic/elasticsearch": "^9.1.0",
     "@react-oauth/google": "^0.12.2",
     "@sentry/integrations": "^7.114.0",
     "@sentry/node": "^9.42.1",
